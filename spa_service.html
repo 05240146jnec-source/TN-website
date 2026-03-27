@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TN Admin | Interactive Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-green: #004d26;
+            --bg-body: #ffffff;
+            --card-gray: #f4f4f4;
+            --topbar-gray: #dbdbdb;
+            --input-fill: #e8e8e8;
+            --topbar-height: 70px;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Playfair Display', serif;
+        }
+
+        body { background-color: var(--bg-body); display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- TOP BAR --- */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-height);
+            background: var(--topbar-gray); display: flex; justify-content: space-between;
+            align-items: center; padding: 0 40px; z-index: 1000;
+        }
+        .logo { font-size: 20px; font-weight: 700; cursor: pointer; color: black; text-decoration: none; }
+        .logo span { color: var(--primary-green); }
+        .user-profile { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .avatar { background: var(--primary-green); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width); background: white; position: fixed;
+            top: var(--topbar-height); bottom: 0; left: 0; padding: 30px 20px;
+            border-right: 1px solid #f0f0f0; display: flex; flex-direction: column;
+            z-index: 999; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 15px; flex-grow: 1; }
+        
+        .nav-item {
+            display: flex; align-items: center; padding: 12px 18px; text-decoration: none;
+            color: black; font-size: 16px; font-weight: 700; border-radius: 50px;
+            transition: 0.2s; cursor: pointer; border: none; background: none; width: 100%;
+            text-align: left;
+        }
+        .nav-item i { margin-right: 12px; width: 20px; text-align: center; }
+        .nav-item:hover { background-color: #f5f5f5; }
+        .nav-item.active { background-color: var(--primary-green) !important; color: white !important; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            margin-left: var(--sidebar-width); margin-top: var(--topbar-height);
+            flex-grow: 1; padding: 60px 80px; overflow-y: auto; width: 100%;
+            background: white; transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .content-section { display: none; }
+        .active-section { display: block; }
+
+        /* --- DASHBOARD GRID --- */
+        .dashboard-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; }
+        .card { background-color: var(--card-gray); border-radius: 12px; padding: 55px 40px; position: relative; color: black; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 220px; cursor: pointer; }
+        .stat-number { font-size: 36px; font-weight: 900; color: var(--primary-green); }
+        .card-icon { position: absolute; top: 25px; right: 25px; font-size: 26px; }
+        .wide-card { grid-column: 1; }
+
+        /* --- SPA SERVICE STYLING --- */
+        .spa-container { max-width: 900px; }
+        .spa-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 5px; }
+        .spa-header p { font-size: 18px; margin-bottom: 40px; color: #555; }
+        .spa-form-row { display: flex; gap: 40px; margin-bottom: 25px; }
+        .spa-form-group { flex: 1; display: flex; flex-direction: column; }
+        .spa-form-group label { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+        .spa-input {
+            background-color: var(--input-fill);
+            border: none; border-radius: 12px; padding: 16px 20px;
+            font-size: 16px; outline: none; width: 100%;
+        }
+        textarea.spa-input { resize: none; height: 120px; }
+        .spa-btn-group { display: flex; justify-content: flex-end; gap: 20px; margin-top: 40px; }
+        .spa-btn { 
+            padding: 12px 45px; border-radius: 12px; font-size: 18px; 
+            font-weight: 700; cursor: pointer; border: none; transition: 0.2s;
+        }
+        .btn-cancel { background-color: #e0e0e0; color: black; }
+        .btn-save { background-color: #e0e0e0; color: black; }
+        .btn-save:hover { background-color: var(--primary-green); color: white; }
+
+        /* --- PROFILE & EDIT STYLING --- */
+        .profile-container { max-width: 750px; margin: 0 auto; text-align: center; }
+        .info-box { background-color: #e6e6e6; border: 1px solid #999; border-radius: 20px; padding: 60px; text-align: left; margin-bottom: 30px; }
+        .info-item { font-size: 20px; font-weight: 700; margin-bottom: 25px; }
+        .edit-card { background-color: white; border: 1px solid #999; border-radius: 20px; padding: 40px 60px; text-align: left; }
+        .form-row { display: flex; gap: 20px; }
+        .form-group { flex: 1; display: flex; flex-direction: column; margin-bottom: 15px; }
+        .form-group label { font-size: 18px; font-weight: 700; margin-bottom: 5px; }
+        input:not(.spa-input) { border: 1.5px solid #999; border-radius: 12px; padding: 12px; font-size: 16px; outline: none; width: 100%; }
+        .save-btn { 
+            background-color: var(--primary-green); color: white; border: none; border-radius: 15px; 
+            padding: 16px; width: 100%; font-size: 20px; font-weight: 700; cursor: pointer; 
+            margin-top: 10px; transition: 0.2s; 
+        }
+
+        /* --- CUSTOM TOAST NOTIFICATION --- */
+        .toast {
+            position: fixed; bottom: 30px; right: 30px; background: #333; color: white;
+            padding: 15px 30px; border-radius: 8px; font-weight: 600; display: none;
+            z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header class="topbar">
+        <div class="logo" onclick="navigateTo('dashboard')"><span>TN</span> ADMIN</div>
+        <div class="user-profile" onclick="navigateTo('profile')">
+            <div class="avatar">A</div>
+            <span><b id="top-name">Admin</b></span>
+        </div>
+    </header>
+
+    <aside id="main-sidebar" class="sidebar">
+        <nav class="nav-links">
+            <button class="nav-item" id="btn-dashboard" onclick="navigateTo('dashboard')"><i class="fa-solid fa-table-cells-large"></i> Dashboard</button>
+            <button class="nav-item" id="btn-bookings" onclick="navigateTo('bookings')"><i class="fa-solid fa-calendar-check"></i> Bookings</button>
+            <button class="nav-item" id="btn-menu" onclick="navigateTo('menu')"><i class="fa-solid fa-utensils"></i> Restaurant Menu</button>
+            <button class="nav-item" id="btn-rooms" onclick="navigateTo('rooms')"><i class="fa-solid fa-bed"></i> Rooms</button>
+            <button class="nav-item" id="btn-spa" onclick="navigateTo('spa')"><i class="fa-solid fa-spa"></i> Spa Services</button>
+            <button class="nav-item" id="btn-user" onclick="navigateTo('user')"><i class="fa-solid fa-circle-user"></i> User</button>
+            <button class="nav-item" id="btn-feedback" onclick="navigateTo('feedback')"><i class="fa-solid fa-comment-dots"></i> Feedback</button>
+            <a href="#" class="nav-item" onclick="showToast('Redirecting...')"><i class="fa-solid fa-circle-arrow-left"></i> Back to site</a>
+        </nav>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        <section id="dashboard" class="content-section">
+            <div class="dashboard-grid">
+                <div class="card wide-card" onclick="navigateTo('bookings')">
+                    <div class="card-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                    <h2>Total bookings</h2><p class="stat-number">1,245</p>
+                </div>
+                <div class="card" onclick="navigateTo('user')">
+                    <div class="card-icon"><i class="fa-regular fa-circle-user"></i></div>
+                    <h2>Registered Users</h2><p class="stat-number">482</p>
+                </div>
+                <div class="card wide-card" onclick="navigateTo('feedback')">
+                    <div class="card-icon"><i class="fa-regular fa-comments"></i></div>
+                    <h2>Total Feedback</h2><p class="stat-number">95</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="spa" class="content-section">
+            <div class="spa-container">
+                <div class="spa-header"><h2>Edit Service</h2><p>Update the services details</p></div>
+                <div id="spa-form">
+                    <div class="spa-form-row">
+                        <div class="spa-form-group"><label>Service Name</label><input type="text" id="spa-name" class="spa-input" value="Swedish massage"></div>
+                        <div class="spa-form-group" style="flex: 0.4;"><label>Price</label><input type="text" id="spa-price" class="spa-input" value="Nu. 2500"></div>
+                    </div>
+                    <div class="spa-form-group" style="margin-bottom: 25px;"><label>Description</label><textarea id="spa-desc" class="spa-input">Gentle full body massage for relaxation and stress relief</textarea></div>
+                    <div class="spa-form-row">
+                        <div class="spa-form-group"><label>Duration</label><input type="text" id="spa-dur" class="spa-input" value="60 min"></div>
+                        <div class="spa-form-group"><label>Category</label><input type="text" id="spa-cat" class="spa-input" value="Massage"></div>
+                    </div>
+                    <div class="spa-btn-group">
+                        <button class="spa-btn btn-cancel" onclick="handleCancel('spa')">Cancel</button>
+                        <button class="spa-btn btn-save" onclick="handleSpaUpdate()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="profile" class="content-section">
+            <div class="profile-container">
+                <div style="font-size: 50px;"><i class="fa-solid fa-circle-user"></i></div>
+                <h2 style="font-weight: 700;">Your Profile</h2>
+                <div class="info-box">
+                    <div id="p-name" class="info-item">Name : Ritu Maya Rai</div>
+                    <div id="p-email" class="info-item">Email : admin@email.com</div>
+                    <div id="p-phone" class="info-item">Phone : 77848491</div>
+                    <div class="info-item">Role : Admin</div>
+                </div>
+                <button class="save-btn" style="width:auto; padding:15px 50px;" onclick="navigateTo('edit')">Edit Profile</button>
+            </div>
+        </section>
+
+        <section id="edit" class="content-section">
+            <div class="profile-container">
+                <div style="font-size: 50px;"><i class="fa-solid fa-circle-user"></i></div>
+                <h2 style="font-weight: 700;">Edit Your Account</h2>
+                <div class="edit-card">
+                    <div class="form-row">
+                        <div class="form-group"><label>First Name</label><input type="text" id="in-f" value="Ritu Maya"></div>
+                        <div class="form-group"><label>Last Name</label><input type="text" id="in-l" value="Rai"></div>
+                    </div>
+                    <div class="form-group"><label>Email</label><input type="email" id="in-e" value="admin@email.com"></div>
+                    <div class="form-group"><label>Phone</label><input type="text" id="in-ph" value="77848491"></div>
+                    <button class="save-btn" onclick="applyChanges()">Save Changes</button>
+                </div>
+            </div>
+        </section>
+        
+        <section id="generic" class="content-section"><h2 id="gen-title">Page</h2><p>Under development.</p></section>
+    </main>
+
+    <div id="toast" class="toast">Action completed!</div>
+
+    <script>
+        // Store original values to detect changes
+        let originalSpaData = {};
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 3000);
+        }
+
+        function navigateTo(pageId) {
+            history.pushState({ id: pageId }, "", "#" + pageId);
+            renderPage(pageId);
+        }
+
+        function renderPage(pageId) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active-section'));
+            let target = document.getElementById(pageId) || document.getElementById('generic');
+            if (target.id === 'generic') document.getElementById('gen-title').innerText = pageId;
+            target.classList.add('active-section');
+
+            // Save initial data when entering Spa page
+            if(pageId === 'spa') {
+                originalSpaData = {
+                    name: document.getElementById('spa-name').value,
+                    price: document.getElementById('spa-price').value,
+                    desc: document.getElementById('spa-desc').value,
+                    dur: document.getElementById('spa-dur').value,
+                    cat: document.getElementById('spa-cat').value
+                };
+            }
+
+            const sidebar = document.getElementById('main-sidebar');
+            const main = document.getElementById('main-content');
+            if (pageId === 'profile' || pageId === 'edit') {
+                sidebar.style.transform = 'translateX(-100%)'; main.style.marginLeft = '0';
+            } else {
+                sidebar.style.transform = 'translateX(0)'; main.style.marginLeft = 'var(--sidebar-width)';
+            }
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById('btn-' + pageId);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        // Logic for Spa Update with change detection
+        function handleSpaUpdate() {
+            const currentData = {
+                name: document.getElementById('spa-name').value,
+                price: document.getElementById('spa-price').value,
+                desc: document.getElementById('spa-desc').value,
+                dur: document.getElementById('spa-dur').value,
+                cat: document.getElementById('spa-cat').value
+            };
+
+            const isChanged = Object.keys(currentData).some(key => currentData[key] !== originalSpaData[key]);
+
+            if (!isChanged) {
+                showToast("No changes detected. Update the details before saving.");
+            } else {
+                originalSpaData = {...currentData}; // Update original reference
+                showToast(`Changes to "${currentData.name}" saved successfully.`);
+            }
+        }
+
+        // Logic for Cancel with change detection
+        function handleCancel(type) {
+            if (type === 'spa') {
+                const currentData = {
+                    name: document.getElementById('spa-name').value,
+                    price: document.getElementById('spa-price').value,
+                    desc: document.getElementById('spa-desc').value,
+                    dur: document.getElementById('spa-dur').value,
+                    cat: document.getElementById('spa-cat').value
+                };
+
+                const isChanged = Object.keys(currentData).some(key => currentData[key] !== originalSpaData[key]);
+
+                if (!isChanged) {
+                    showToast("No modifications were made.");
+                } else {
+                    // Reset to original data
+                    document.getElementById('spa-name').value = originalSpaData.name;
+                    document.getElementById('spa-price').value = originalSpaData.price;
+                    document.getElementById('spa-desc').value = originalSpaData.desc;
+                    document.getElementById('spa-dur').value = originalSpaData.dur;
+                    document.getElementById('spa-cat').value = originalSpaData.cat;
+                    showToast("Changes discarded.");
+                }
+            }
+        }
+
+        function applyChanges() {
+            const f = document.getElementById('in-f').value, l = document.getElementById('in-l').value;
+            document.getElementById('p-name').innerText = "Name : " + f + " " + l;
+            document.getElementById('top-name').innerText = f + " " + l;
+            navigateTo('profile');
+            showToast("Profile updated!");
+        }
+
+        window.onpopstate = (e) => renderPage(e.state ? e.state.id : 'dashboard');
+        window.onload = () => navigateTo(window.location.hash.substring(1) || 'dashboard');
+    </script>
+</body>
+</html>
