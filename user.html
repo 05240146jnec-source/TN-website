@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TN Admin | Interactive Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-green: #004d26;
+            --bg-body: #ffffff;
+            --card-gray: #f4f4f4;
+            --topbar-gray: #dbdbdb;
+            --topbar-height: 70px;
+            --sidebar-width: 260px;
+            --light-grey-bg: #e0e0e0;
+            --status-red: #e53935;
+        }
+
+        /* Standardize font for everything */
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Playfair Display', serif;
+        }
+
+        body { background-color: var(--bg-body); display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- TOP BAR --- */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-height);
+            background: var(--topbar-gray); display: flex; justify-content: space-between;
+            align-items: center; padding: 0 40px; z-index: 1000;
+        }
+        .logo { font-size: 20px; font-weight: 700; cursor: pointer; color: black; text-decoration: none; }
+        .logo span { color: var(--primary-green); }
+        .user-profile { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .avatar { background: var(--primary-green); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width); background: white; position: fixed;
+            top: var(--topbar-height); bottom: 0; left: 0; padding: 30px 20px;
+            border-right: 1px solid #f0f0f0; display: flex; flex-direction: column;
+            z-index: 999; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 15px; flex-grow: 1; }
+        
+        .nav-item {
+            display: flex; align-items: center; padding: 12px 18px; text-decoration: none;
+            color: black; font-size: 16px; font-weight: 700; border-radius: 50px;
+            transition: 0.2s; cursor: pointer; border: none; background: none; width: 100%;
+            text-align: left;
+        }
+        .nav-item i { margin-right: 12px; width: 20px; text-align: center; }
+        .nav-item:hover { background-color: #f5f5f5; }
+        .nav-item.active { background-color: var(--primary-green) !important; color: white !important; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            margin-left: var(--sidebar-width); margin-top: var(--topbar-height);
+            flex-grow: 1; padding: 40px 60px; overflow-y: auto; width: 100%;
+            background: white; transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #user { background-color: var(--light-grey-bg); margin: -40px -60px; padding: 60px; min-height: calc(100vh - var(--topbar-height)); }
+
+        .content-section { display: none; }
+        .active-section { display: block; }
+
+        /* --- USER PAGE COMPONENTS --- */
+        .search-container {
+            background: white; border-radius: 15px; padding: 10px 20px;
+            display: flex; align-items: center; gap: 15px; margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #ccc;
+        }
+        .search-container i { color: #666; font-size: 18px; }
+        .search-container input { border: none; font-size: 18px; width: 100%; outline: none; background: transparent; }
+
+        .table-container {
+            background: white; border-radius: 25px; padding: 20px 40px 40px 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .user-table { width: 100%; border-collapse: collapse; }
+        .user-table th { text-align: left; padding: 20px 10px; font-size: 18px; font-weight: 700; border-bottom: 1px solid #ddd; }
+        .user-table td { padding: 20px 10px; font-size: 16px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+        
+        /* UPDATED STATUS STYLES */
+        .status-blocked { 
+            background-color: var(--status-red); 
+            color: white !important; 
+            padding: 6px 14px; 
+            border-radius: 8px; 
+            font-weight: 500;
+            display: inline-block;
+        }
+        .status-active { color: #000; font-weight: 500; }
+        
+        .action-icons { display: flex; gap: 20px; align-items: center; }
+        .action-icons i { cursor: pointer; font-size: 18px; transition: 0.2s; }
+        .action-icons i:hover { color: var(--primary-green); }
+
+        /* --- DASHBOARD GRID --- */
+        .dashboard-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; }
+        .card { background-color: var(--card-gray); border-radius: 12px; padding: 55px 40px; position: relative; color: black; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 220px; cursor: pointer; }
+        .stat-number { font-size: 36px; font-weight: 900; color: var(--primary-green); }
+        .card-icon { position: absolute; top: 25px; right: 25px; font-size: 26px; }
+        .wide-card { grid-column: 1; }
+
+        /* --- PROFILE & EDIT STYLING --- */
+        .profile-container { max-width: 750px; margin: 0 auto; text-align: center; }
+        .info-box { background-color: #e6e6e6; border: 1px solid #999; border-radius: 20px; padding: 60px; text-align: left; margin-bottom: 30px; }
+        .info-item { font-size: 20px; font-weight: 700; margin-bottom: 25px; }
+        
+        .edit-card { background-color: white; border: 1px solid #999; border-radius: 20px; padding: 40px 60px; text-align: left; }
+        .form-row { display: flex; gap: 20px; }
+        .form-group { flex: 1; display: flex; flex-direction: column; margin-bottom: 15px; }
+        .form-group label { font-size: 18px; font-weight: 700; margin-bottom: 5px; }
+        input[type="text"], input[type="email"], input[type="password"] { border: 1.5px solid #999; border-radius: 12px; padding: 12px; font-size: 16px; outline: none; width: 100%; }
+        
+        .save-btn { 
+            background-color: var(--primary-green); color: white; border: none; border-radius: 15px; 
+            padding: 16px; width: 100%; font-size: 20px; font-weight: 700; cursor: pointer; 
+            margin-top: 10px; transition: 0.2s; 
+        }
+
+        /* --- MODAL STYLING --- */
+        .modal-overlay {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0; 
+            width: 100%; height: 100%; background: rgba(0,0,0,0.4); 
+            align-items: center; justify-content: center;
+        }
+        .modal-card {
+            background: white; width: 680px; border-radius: 25px; padding: 40px; 
+            position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .close-modal { position: absolute; top: 25px; right: 35px; font-size: 28px; cursor: pointer; }
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 60px; margin-top: 30px; }
+        .modal-item label { font-weight: 700; display: block; margin-bottom: 5px; font-size: 17px; }
+        .modal-item p { font-size: 16px; }
+
+    </style>
+</head>
+<body>
+
+    <header class="topbar">
+        <div class="logo" onclick="navigateTo('dashboard')"><span>TN</span> ADMIN</div>
+        <div class="user-profile" onclick="navigateTo('profile')">
+            <div class="avatar">A</div>
+            <span><b id="top-name">Admin</b></span>
+        </div>
+    </header>
+
+    <aside id="main-sidebar" class="sidebar">
+        <nav class="nav-links">
+            <button class="nav-item active" id="btn-dashboard" onclick="navigateTo('dashboard')"><i class="fa-solid fa-table-cells-large"></i> Dashboard</button>
+            <button class="nav-item" id="btn-bookings" onclick="navigateTo('bookings')"><i class="fa-solid fa-calendar-check"></i> Bookings</button>
+            <button class="nav-item" id="btn-menu" onclick="navigateTo('menu')"><i class="fa-solid fa-utensils"></i> Restaurant Menu</button>
+            <button class="nav-item" id="btn-rooms" onclick="navigateTo('rooms')"><i class="fa-solid fa-bed"></i> Rooms</button>
+            <button class="nav-item" id="btn-spa" onclick="navigateTo('spa')"><i class="fa-solid fa-spa"></i> Spa Services</button>
+            <button class="nav-item" id="btn-user" onclick="navigateTo('user')"><i class="fa-solid fa-circle-user"></i> User</button>
+            <button class="nav-item" id="btn-feedback" onclick="navigateTo('feedback')"><i class="fa-solid fa-comment-dots"></i> Feedback</button>
+            
+            <a href="#" class="nav-item" onclick="alert('Redirecting to site...')">
+                <i class="fa-solid fa-circle-arrow-left"></i> Back to site
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        
+        <section id="dashboard" class="content-section active-section">
+            <div class="dashboard-grid">
+                <div class="card wide-card" onclick="navigateTo('bookings')">
+                    <div class="card-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                    <h2>Total bookings</h2><p class="stat-number">1,245</p>
+                </div>
+                <div class="card" onclick="navigateTo('user')">
+                    <div class="card-icon"><i class="fa-regular fa-circle-user"></i></div>
+                    <h2>Registered Users</h2><p class="stat-number">482</p>
+                </div>
+                <div class="card wide-card" onclick="navigateTo('feedback')">
+                    <div class="card-icon"><i class="fa-regular fa-comments"></i></div>
+                    <h2>Total Feedback</h2><p class="stat-number">95</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="user" class="content-section">
+            <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 25px;">User</h2>
+            
+            <div class="search-container">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search users by name...">
+            </div>
+
+            <div class="table-container">
+                <table class="user-table" id="userTable">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Phone</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Booking</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Pema Choden</td>
+                            <td>77848491</td>
+                            <td>User</td>
+                            <td class="status-active">Active</td>
+                            <td>3</td>
+                            <td>2026-03-15</td>
+                            <td class="action-icons"><i class="fa-regular fa-eye" onclick="openUserModal(this)"></i> <i class="fa-solid fa-user-gear"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Dawa</td>
+                            <td>17234567</td>
+                            <td>User</td>
+                            <td class="status-active">Active</td>
+                            <td>7</td>
+                            <td>2026-03-15</td>
+                            <td class="action-icons"><i class="fa-regular fa-eye" onclick="openUserModal(this)"></i> <i class="fa-solid fa-user-gear"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Pema</td>
+                            <td>17234567</td>
+                            <td>User</td>
+                            <td class="status-active">Active</td>
+                            <td>8</td>
+                            <td>2026-03-15</td>
+                            <td class="action-icons"><i class="fa-regular fa-eye" onclick="openUserModal(this)"></i> <i class="fa-solid fa-user-gear"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Gayser</td>
+                            <td>12345678</td>
+                            <td>User</td>
+                            <td><span class="status-blocked">Blocked</span></td>
+                            <td>2</td>
+                            <td>2026-03-15</td>
+                            <td class="action-icons"><i class="fa-regular fa-eye" onclick="openUserModal(this)"></i> <i class="fa-solid fa-user-xmark"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="profile" class="content-section">
+            <div class="profile-container">
+                <div style="font-size: 50px;"><i class="fa-solid fa-circle-user"></i></div>
+                <h2 style="font-weight: 700;">Your Profile</h2>
+                <p style="font-style: italic; margin-bottom: 30px;">Your profile says more than your words</p>
+                <div class="info-box">
+                    <div id="p-name" class="info-item">Name : Ritu Maya Rai</div>
+                    <div id="p-email" class="info-item">Email : admin@email.com</div>
+                    <div id="p-phone" class="info-item">Phone : 77848491</div>
+                    <div class="info-item">Role : Admin</div>
+                </div>
+                <button class="save-btn" style="width:auto; padding:15px 50px;" onclick="navigateTo('edit')">Edit Profile</button>
+            </div>
+        </section>
+
+        <section id="edit" class="content-section">
+            <div class="profile-container">
+                <div style="font-size: 50px;"><i class="fa-solid fa-circle-user"></i></div>
+                <h2 style="font-weight: 700;">Edit Your Account</h2>
+                <div class="edit-card">
+                    <div class="form-row">
+                        <div class="form-group"><label>First Name</label><input type="text" id="in-f" value="Ritu Maya"></div>
+                        <div class="form-group"><label>Last Name</label><input type="text" id="in-l" value="Rai"></div>
+                    </div>
+                    <div class="form-group"><label>Email</label><input type="email" id="in-e" value="admin@email.com"></div>
+                    <div class="form-group"><label>Phone</label><input type="text" id="in-ph" value="77848491"></div>
+                    
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" value="********">
+                    </div>
+                    <div class="form-group">
+                        <label>Change Password</label>
+                        <input type="password" placeholder="New Password">
+                    </div>
+                    
+                    <button class="save-btn" onclick="applyChanges()">Save Changes</button>
+                </div>
+            </div>
+        </section>
+        
+        <section id="generic" class="content-section">
+            <h2 id="gen-title">Page</h2><p>Content is currently under development.</p>
+        </section>
+    </main>
+
+    <div id="userModal" class="modal-overlay">
+        <div class="modal-card">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            
+            <h2 id="modal-header-name" style="font-size: 24px; font-weight: 700; margin-bottom: 5px;">Pema Choden</h2>
+            <p style="color: #666; margin-bottom: 35px; font-size: 16px;">Users detail and management</p>
+
+            <div style="text-align:center; margin-bottom: 40px;">
+                <h3 id="modal-full-name" style="font-size: 22px; font-weight: 700;">Pema Choden</h3>
+                <p id="modal-email" style="font-size: 18px; color: #333;">pema@gmail.com</p>
+            </div>
+
+            <div class="modal-grid">
+                <div class="modal-item"><label>Phone</label><p id="modal-phone">77848491</p></div>
+                <div class="modal-item"><label>Role</label><p id="modal-role">User</p></div>
+                <div class="modal-item"><label>Status</label><p id="modal-status">Active</p></div>
+                <div class="modal-item"><label>Total booking</label><p id="modal-booking">3</p></div>
+                <div class="modal-item"><label>Joined</label><p id="modal-joined">2026-03-15</p></div>
+                <div class="modal-item"><label>UserID</label><p id="modal-id">U-001</p></div>
+            </div>
+
+            <div style="display: flex; gap: 20px; justify-content: flex-end; margin-top: 45px;">
+                <button id="modal-role-btn" class="nav-item" style="border: 1.5px solid #ccc; width: auto; padding: 12px 25px; border-radius: 12px;" onclick="toggleRole()">
+                    <i class="fa-solid fa-clipboard-check"></i> Promote to Admin
+                </button>
+                <button id="modal-block-btn" class="save-btn" style="width: auto; padding: 12px 35px; margin-top:0; border-radius: 12px;" onclick="toggleBlock()">Block User</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- SEARCH FUNCTIONALITY ---
+        function filterUsers() {
+            let input = document.getElementById("userSearch");
+            let filter = input.value.toUpperCase();
+            let table = document.getElementById("userTable");
+            let tr = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < tr.length; i++) {
+                let tdName = tr[i].getElementsByTagName("td")[0];
+                if (tdName) {
+                    let txtValue = tdName.textContent || tdName.innerText;
+                    tr[i].style.display = (txtValue.toUpperCase().indexOf(filter) > -1) ? "" : "none";
+                }
+            }
+        }
+
+        // --- NAVIGATION LOGIC ---
+        function navigateTo(pageId) {
+            history.pushState({ id: pageId }, "", "#" + pageId);
+            renderPage(pageId);
+        }
+
+        function renderPage(pageId) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active-section'));
+            
+            let target = document.getElementById(pageId);
+            if (!target) {
+                target = document.getElementById('generic');
+                document.getElementById('gen-title').innerText = pageId.charAt(0).toUpperCase() + pageId.slice(1);
+            }
+            target.classList.add('active-section');
+
+            const sidebar = document.getElementById('main-sidebar');
+            const main = document.getElementById('main-content');
+
+            if (pageId === 'profile' || pageId === 'edit') {
+                sidebar.style.transform = 'translateX(-100%)';
+                main.style.marginLeft = '0';
+            } else {
+                sidebar.style.transform = 'translateX(0)';
+                main.style.marginLeft = 'var(--sidebar-width)';
+            }
+
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById('btn-' + pageId);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        // --- MODAL LOGIC UPDATED ---
+        function openUserModal(element) {
+            let row = element.closest('tr');
+            let name = row.cells[0].innerText;
+            let phone = row.cells[1].innerText;
+            let role = row.cells[2].innerText;
+            let status = row.cells[3].innerText;
+            let booking = row.cells[4].innerText;
+            let joined = row.cells[5].innerText;
+
+            document.getElementById('modal-header-name').innerText = name;
+            document.getElementById('modal-full-name').innerText = name;
+            document.getElementById('modal-email').innerText = name.toLowerCase().replace(/\s/g, '') + "@gmail.com";
+            document.getElementById('modal-phone').innerText = phone;
+            document.getElementById('modal-role').innerText = role;
+            document.getElementById('modal-status').innerText = status;
+            document.getElementById('modal-booking').innerText = booking;
+            document.getElementById('modal-joined').innerText = joined;
+            document.getElementById('modal-id').innerText = "U-00" + (row.rowIndex);
+
+            // Toggle Role Button Text
+            const roleBtn = document.getElementById('modal-role-btn');
+            if(role === 'Admin') {
+                roleBtn.innerHTML = '<i class="fa-solid fa-user-minus"></i> Demote to User';
+            } else {
+                roleBtn.innerHTML = '<i class="fa-solid fa-clipboard-check"></i> Promote to Admin';
+            }
+
+            // Toggle Block Button Color & Text
+            const blockBtn = document.getElementById('modal-block-btn');
+            if(status === 'Blocked') {
+                blockBtn.innerText = "Unblock User";
+                blockBtn.style.backgroundColor = "var(--primary-green)";
+            } else {
+                blockBtn.innerText = "Block User";
+                blockBtn.style.backgroundColor = "var(--status-red)";
+            }
+
+            document.getElementById('userModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        // --- TOGGLE ROLE (ADMIN/USER) ---
+        function toggleRole() {
+            let name = document.getElementById('modal-full-name').innerText;
+            let table = document.getElementById("userTable");
+            let tr = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < tr.length; i++) {
+                if (tr[i].cells[0].innerText === name) {
+                    let currentRole = tr[i].cells[2].innerText;
+                    tr[i].cells[2].innerText = (currentRole === "Admin") ? "User" : "Admin";
+                    break;
+                }
+            }
+            closeModal();
+        }
+
+        // --- TOGGLE STATUS (BLOCK/ACTIVE) ---
+        function toggleBlock() {
+            let name = document.getElementById('modal-full-name').innerText;
+            let table = document.getElementById("userTable");
+            let tr = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < tr.length; i++) {
+                if (tr[i].cells[0].innerText === name) {
+                    let currentStatus = tr[i].cells[3].innerText;
+                    if (currentStatus === "Active") {
+                        tr[i].cells[3].innerHTML = '<span class="status-blocked">Blocked</span>';
+                        tr[i].cells[6].querySelector('i.fa-solid').className = "fa-solid fa-user-xmark";
+                    } else {
+                        tr[i].cells[3].innerHTML = 'Active';
+                        tr[i].cells[3].className = "status-active";
+                        tr[i].cells[6].querySelector('i.fa-solid').className = "fa-solid fa-user-gear";
+                    }
+                    break;
+                }
+            }
+            closeModal();
+        }
+
+        window.onclick = function(event) {
+            let modal = document.getElementById('userModal');
+            if (event.target == modal) closeModal();
+        };
+
+        function applyChanges() {
+            const f = document.getElementById('in-f').value;
+            const l = document.getElementById('in-l').value;
+            const e = document.getElementById('in-e').value;
+            const ph = document.getElementById('in-ph').value;
+            
+            document.getElementById('p-name').innerText = "Name : " + f + " " + l;
+            document.getElementById('p-email').innerText = "Email : " + e;
+            document.getElementById('p-phone').innerText = "Phone : " + ph;
+            document.getElementById('top-name').innerText = f + " " + l;
+
+            navigateTo('profile');
+            alert("Changes saved!");
+        }
+
+        window.onload = () => {
+            const hash = window.location.hash.replace('#', '') || 'dashboard';
+            navigateTo(hash);
+        };
+    </script>
+</body>
+</html>
