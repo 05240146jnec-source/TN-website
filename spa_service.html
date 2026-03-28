@@ -194,7 +194,7 @@
                         <button class="filter-btn" onclick="filterSpa('Facial', this)">Facial</button>
                         <button class="filter-btn" onclick="filterSpa('Body', this)">Body</button>
                         <button class="filter-btn" onclick="filterSpa('Package', this)">Package</button>
-                        <button class="spa-btn btn-save" style="padding: 10px 25px; font-size: 14px; margin-left: auto;">+ Add service</button>
+                        <button class="spa-btn btn-save" style="padding: 10px 25px; font-size: 14px; margin-left: auto;" onclick="toggleSpaAdd(true)">+ Add service</button>
                     </div>
 
                     <div id="spa-cards-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
@@ -243,6 +243,44 @@
                                 </label>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div id="spa-add-view" style="display: none;">
+                    <div class="spa-header">
+                        <h2>Add spa service</h2>
+                        <p>Add the spa services details below</p>
+                    </div>
+                    <div class="spa-form-row">
+                        <div class="spa-form-group">
+                            <label>Service name</label>
+                            <input type="text" id="add-spa-name" class="spa-input" value="Facial">
+                        </div>
+                        <div class="spa-form-group">
+                            <label>Upload Image</label>
+                            <div class="spa-input" style="display: flex; justify-content: center; align-items: center; cursor: pointer; height: 55px;">
+                                <i class="fa-solid fa-upload"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="spa-form-row">
+                        <div class="spa-form-group">
+                            <label>Price(Nu)</label>
+                            <input type="number" id="add-spa-price" class="spa-input" value="3000">
+                        </div>
+                        <div class="spa-form-group">
+                            <label>Category</label>
+                            <select id="add-spa-cat" class="spa-input" style="appearance: none;">
+                                <option value="Massage" selected>Massage</option>
+                                <option value="Facial">Facial</option>
+                                <option value="Body">Body</option>
+                                <option value="Package">Package</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="spa-btn-group">
+                        <button class="spa-btn btn-cancel" onclick="toggleSpaAdd(false)">Cancel</button>
+                        <button class="spa-btn btn-save" onclick="saveNewService()">Add service</button>
                     </div>
                 </div>
 
@@ -342,6 +380,7 @@
                 document.getElementById('spa-list-view').style.display = 'block';
                 document.getElementById('spa-edit-view').style.display = 'none';
                 document.getElementById('spa-delete-view').style.display = 'none';
+                document.getElementById('spa-add-view').style.display = 'none'; // Added hide for Add view
             }
 
             const sidebar = document.getElementById('main-sidebar');
@@ -356,7 +395,7 @@
             if (activeBtn) activeBtn.classList.add('active');
         }
 
-        // --- FILTER SPA (Added Part) ---
+        // --- FILTER SPA ---
         function filterSpa(category, btn) {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -369,6 +408,60 @@
                     card.style.display = 'none';
                 }
             });
+        }
+
+        // --- ADD LOGIC ---
+        function toggleSpaAdd(show) {
+            document.getElementById('spa-list-view').style.display = show ? 'none' : 'block';
+            document.getElementById('spa-add-view').style.display = show ? 'block' : 'none';
+            if(show) {
+                // Set default values matching your design requirements
+                document.getElementById('add-spa-name').value = '';
+                document.getElementById('add-spa-price').value = '';
+            }
+        }
+
+        function saveNewService() {
+            const name = document.getElementById('add-spa-name').value;
+            const price = document.getElementById('add-spa-price').value;
+            const cat = document.getElementById('add-spa-cat').value;
+
+            if (!name || !price) {
+                showToast("Please fill in all fields.");
+                return;
+            }
+
+            const grid = document.getElementById('spa-cards-grid');
+            const newId = 'card-' + Date.now();
+
+            const cardHTML = `
+                <div class="service-card" id="${newId}" data-category="${cat}">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span class="category-tag">${cat}</span>
+                        <div style="display: flex; gap: 15px; color: #666; cursor: pointer;">
+                            <i class="fa-solid fa-pencil" onclick="toggleSpaEdit(true)"></i>
+                            <i class="fa-solid fa-trash-can" onclick="showDeleteConfirmation('${newId}', '${name}')"></i>
+                        </div>
+                    </div>
+                    <h3 style="margin: 15px 0 5px;">${name}</h3>
+                    <p style="color: #666; font-size: 14px;">Professional treatment service</p>
+                    <div style="display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px; font-weight: 700;">
+                        <span><i class="fa-regular fa-clock"></i> 45 min</span>
+                        <span>Nu. ${price}</span>
+                    </div>
+                    <div class="status-container">
+                        <span class="status-label">Accepting booking</span>
+                        <label class="switch">
+                            <input type="checkbox" checked onchange="showToast('${name} status updated')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            `;
+
+            grid.insertAdjacentHTML('beforeend', cardHTML);
+            showToast(`"${name}" added successfully!`);
+            toggleSpaAdd(false);
         }
 
         // --- DELETE LOGIC ---
@@ -395,7 +488,7 @@
             }
         }
 
-        // --- SPA VIEW LOGIC ---
+        // --- SPA VIEW LOGIC (EDIT) ---
         function toggleSpaEdit(showEdit) {
             const listView = document.getElementById('spa-list-view');
             const editView = document.getElementById('spa-edit-view');
@@ -423,7 +516,7 @@
             const current = getSpaInputs();
             const isChanged = Object.keys(current).some(k => current[k] !== originalSpaData[k]);
             if (!isChanged) {
-                showToast("No changes detected. Update the details before saving.");
+                showToast("No changes detected.");
             } else {
                 showToast(`"${current.name}" updated successfully!`);
                 toggleSpaEdit(false);
@@ -431,20 +524,8 @@
         }
 
         function handleCancel(type) {
-            const current = getSpaInputs();
-            const isChanged = Object.keys(current).some(k => current[k] !== originalSpaData[k]);
-            if (!isChanged) {
-                showToast("No modifications were made.");
-                toggleSpaEdit(false);
-            } else {
-                document.getElementById('spa-name').value = originalSpaData.name;
-                document.getElementById('spa-price').value = originalSpaData.price;
-                document.getElementById('spa-desc').value = originalSpaData.desc;
-                document.getElementById('spa-dur').value = originalSpaData.dur;
-                document.getElementById('spa-cat').value = originalSpaData.cat;
-                showToast("Changes discarded.");
-                toggleSpaEdit(false);
-            }
+            toggleSpaEdit(false);
+            showToast("Changes discarded.");
         }
 
         // --- PROFILE LOGIC ---
