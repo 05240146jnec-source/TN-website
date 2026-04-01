@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TN ADMIN - Dashboard</title>
+    
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-green: #005a2b;
+            --bg-light: #ffffff;
+            --card-bg: #f5f6f7;
+            --border-line: #e0e0e0;
+            --text-black: #000000;
+            --top-bar-grey: #f8f9fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 320px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 0;
+            border-right: 1.5px solid var(--border-line);
+            z-index: 10;
+        }
+
+        .logo-area {
+            padding: 0 40px;
+            margin-bottom: 70px;
+            font-size: 22px;
+            font-weight: 800;
+        }
+        .logo-area span { color: var(--primary-green); }
+
+        .nav-links {
+            list-style: none;
+            padding: 0 25px;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 25px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            border-radius: 50px;
+            font-weight: 700;
+            color: var(--text-black);
+            transition: 0.3s;
+        }
+
+        .nav-item i {
+            margin-right: 18px;
+            font-size: 20px;
+            width: 25px;
+            text-align: center;
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        /* --- MAIN CONTENT --- */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* TOP BAR */
+        .top-bar {
+            height: 100px;
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            padding: 0 60px;
+            background-color: var(--top-bar-grey); 
+            border-bottom: 1.5px solid var(--border-line);
+            position: relative;
+        }
+
+        .top-bar h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        /* ADMIN PROFILE & DROPDOWN */
+        .admin-container {
+            position: absolute;
+            right: 60px;
+            z-index: 100;
+        }
+
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 8px 18px 8px 8px;
+            border-radius: 50px;
+            border: 1px solid var(--border-line);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: 0.2s;
+            user-select: none;
+        }
+
+        .admin-profile:hover {
+            background-color: #f0f0f0;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background-color: var(--primary-green);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            width: 220px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            border: 1px solid var(--border-line);
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            padding: 10px 0;
+            overflow: hidden;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .dropdown-menu.active {
+            display: flex;
+        }
+
+        .dropdown-item {
+            padding: 12px 25px;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: var(--border-line);
+            margin: 5px 0;
+        }
+
+        .logout-text {
+            color: #d93025 !important; /* Red color for Logout */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- GRID LAYOUT --- */
+        .content-area {
+            padding: 60px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; 
+            grid-template-rows: auto auto;
+            gap: 40px;
+            max-width: 1100px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            background-color: #f0f1f2;
+        }
+
+        .card-icon {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 26px;
+            color: #1a1a1a;
+        }
+
+        .card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .card .stat-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .card.bookings { grid-column: 1; grid-row: 1; }
+        .card.users { grid-column: 2; grid-row: 1; }
+        .card.feedback { grid-column: 1; grid-row: 2; }
+
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="logo-area">
+            <span>TN</span> ADMIN
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item active" data-target="Dashboard">
+                <i class="fa-solid fa-table-cells-large"></i> Dashboard
+            </li>
+            <li class="nav-item" data-target="Bookings">
+                <i class="fa-solid fa-calendar-check"></i> Bookings
+            </li>
+            <li class="nav-item" data-target="Restaurant Menu">
+                <i class="fa-solid fa-utensils"></i> Restaurant Menu
+            </li>
+            <li class="nav-item" data-target="Rooms">
+                <i class="fa-solid fa-bed"></i> Rooms
+            </li>
+            <li class="nav-item" data-target="Spa Services">
+                <i class="fa-solid fa-spa"></i> Spa Services
+            </li>
+            <li class="nav-item" data-target="User Management">
+                <i class="fa-solid fa-circle-user"></i> User
+            </li>
+            <li class="nav-item" data-target="Feedback Center">
+                <i class="fa-solid fa-comments"></i> Feedback
+            </li>
+        </ul>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-container">
+        <header class="top-bar">
+            <h1 id="page-title">Dashboard</h1>
+            
+            <!-- ADMIN SECTION WITH DROPDOWN -->
+            <div class="admin-container">
+                <div class="admin-profile" id="profileToggle">
+                    <div class="avatar">A</div>
+                    <strong style="font-size: 13px;">Admin</strong>
+                </div>
+
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="profile.html" class="dropdown-item">Profile Settings</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item logout-text">Log Out</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="content-area">
+            <div class="dashboard-grid">
+                <div class="card bookings">
+                    <div class="card-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                    <h3>Total bookings</h3>
+                    <div class="stat-number">546</div>
+                </div>
+
+                <div class="card users">
+                    <div class="card-icon"><i class="fa-solid fa-circle-user"></i></div>
+                    <h3>Total Registered Users</h3>
+                    <div class="stat-number">600</div>
+                </div>
+
+                <div class="card feedback">
+                    <div class="card-icon"><i class="fa-solid fa-comments"></i></div>
+                    <h3>Total Feedback</h3>
+                    <div class="stat-number">240</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Sidebar Navigation Logic
+        const menuItems = document.querySelectorAll('.nav-item');
+        const pageTitle = document.getElementById('page-title');
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                menuItems.forEach(btn => btn.classList.remove('active'));
+                item.classList.add('active');
+                const targetName = item.getAttribute('data-target');
+                pageTitle.innerText = targetName;
+            });
+        });
+
+        // Profile Dropdown Logic
+        const profileToggle = document.getElementById('profileToggle');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        profileToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevents immediate closing
+            dropdownMenu.classList.toggle('active');
+        });
+
+        // Close dropdown when clicking anywhere else
+        document.addEventListener('click', () => {
+            dropdownMenu.classList.remove('active');
+        });
+    </script>
+
+</body>
+</html>
