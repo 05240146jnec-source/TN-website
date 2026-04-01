@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TN ADMIN - Edit Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary-green: #005a2b; --bg-light: #f3f3f3; --border-grey: #b0b0b0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-light); }
+        .top-bar { height: 75px; background-color: #d9d9d9; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; }
+        .logo span { color: var(--primary-green); font-weight: 800; font-size: 18px; }
+        .logo { text-decoration: none; color: black; }
+        .avatar-circle { width: 35px; height: 35px; background-color: var(--primary-green); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .container { max-width: 680px; margin: 30px auto; text-align: center; }
+        .container h2 { font-family: 'Playfair Display', serif; font-size: 26px; }
+        .container p { font-family: 'Playfair Display', serif; font-size: 16px; margin-bottom: 25px; }
+        .card { background: white; border: 1px solid var(--border-grey); border-radius: 15px; padding: 40px; text-align: left; }
+        .form-row { display: flex; gap: 20px; }
+        .form-group { flex: 1; margin-bottom: 15px; }
+        label { display: block; font-family: 'Playfair Display', serif; font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+        input { width: 100%; padding: 12px 15px; border: 1px solid var(--border-grey); border-radius: 10px; font-size: 16px; outline: none; }
+        .save-btn { width: 100%; padding: 16px; background-color: var(--primary-green); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+
+        .prompt-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .prompt-box { background: white; padding: 40px; border-radius: 15px; width: 400px; text-align: center; border: 1px solid #999; }
+        .prompt-box h3 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 25px; }
+        .prompt-buttons { display: flex; gap: 20px; justify-content: center; }
+        .p-btn { padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; font-size: 16px; }
+        .p-yes { background-color: var(--primary-green); color: white; }
+        .p-no { background-color: #ddd; color: #333; }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <a href="dashboard.html" class="logo"><span>TN</span> ADMIN</a>
+        <div style="display:flex; align-items:center; gap:10px;"><div class="avatar-circle">A</div><strong>Admin</strong></div>
+    </header>
+    <div class="container">
+        <i class="fa-solid fa-circle-user" style="font-size: 40px;"></i>
+        <h2>Edit Your Account</h2>
+        <p>Your profile says more than your words</p>
+        <div class="card">
+            <form id="editForm">
+                <div class="form-row">
+                    <div class="form-group"><label>First Name</label><input type="text" id="fName"></div>
+                    <div class="form-group"><label>Last Name</label><input type="text" id="lName"></div>
+                </div>
+                <div class="form-group"><label>Email</label><input type="email" id="email"></div>
+                <div class="form-group"><label>Phone</label><input type="text" id="phone"></div>
+                <div class="form-group"><label>Current Password</label><input type="password" id="currPass"></div>
+                <div class="form-group"><label>Change Password</label><input type="password" id="newPass"></div>
+                <button type="submit" class="save-btn">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="prompt-overlay" id="prompt">
+        <div class="prompt-box">
+            <h3>Are you sure?</h3>
+            <div class="prompt-buttons">
+                <button class="p-btn p-yes" id="yesBtn">Yes</button>
+                <button class="p-btn p-no" id="noBtn">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const prompt = document.getElementById('prompt');
+        window.onload = function() {
+            const data = JSON.parse(localStorage.getItem('userProfile')) || { fName: "Ritu Maya", lName: "Rai", email: "admin@email.com", phone: "77848491" };
+            document.getElementById('fName').value = data.fName;
+            document.getElementById('lName').value = data.lName;
+            document.getElementById('email').value = data.email;
+            document.getElementById('phone').value = data.phone;
+        };
+
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!document.getElementById('fName').value || !document.getElementById('lName').value || !document.getElementById('email').value || !document.getElementById('phone').value || !document.getElementById('currPass').value) {
+                alert("Please fill all the credentials.");
+                return;
+            }
+            prompt.style.display = 'flex';
+        });
+
+        document.getElementById('noBtn').onclick = () => prompt.style.display = 'none';
+
+        document.getElementById('yesBtn').onclick = function() {
+            const updated = {
+                fName: document.getElementById('fName').value,
+                lName: document.getElementById('lName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value
+            };
+            localStorage.setItem('userProfile', JSON.stringify(updated));
+            
+            // replaceState ensures the "Edit Profile" page is removed from history
+            window.location.replace("profile.html");
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TN ADMIN - Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary-green: #005a2b; --bg-light: #f9f9f9; --info-box-bg: #e5e5e5; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-light); }
+        .top-bar { height: 80px; background-color: #d9d9d9; display: flex; justify-content: space-between; align-items: center; padding: 0 60px; }
+        .logo-area { font-size: 20px; font-weight: 800; text-decoration: none; color: #000; }
+        .logo-area span { color: var(--primary-green); }
+        .avatar { width: 35px; height: 35px; background-color: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-family: 'Playfair Display', serif; }
+        .profile-container { max-width: 800px; margin: 60px auto; text-align: center; }
+        .profile-header h2 { font-family: 'Playfair Display', serif; font-size: 32px; margin-top: 10px; }
+        .profile-header p { color: #555; margin-bottom: 40px; font-style: italic; font-family: 'Playfair Display', serif; }
+        .info-box { background-color: var(--info-box-bg); border: 1px solid #999; border-radius: 15px; padding: 50px; text-align: left; margin-bottom: 30px; }
+        .info-group { margin-bottom: 20px; font-size: 18px; font-weight: 600; }
+        .edit-btn { width: 100%; padding: 20px; background-color: var(--info-box-bg); border: 1px solid #999; border-radius: 15px; font-size: 18px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .edit-btn:hover { background-color: #ccc; }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <!-- Logo now links to dashboard -->
+        <a href="dashboard.html" class="logo-area"><span>TN</span> ADMIN</a>
+        <div style="display:flex; align-items:center; gap:12px;"><div class="avatar">A</div><strong style="font-size: 14px;">Admin</strong></div>
+    </header>
+    <main class="profile-container">
+        <div class="profile-header">
+            <i class="fa-solid fa-circle-user" style="font-size: 50px;"></i>
+            <h2 id="viewName">Ritu Maya Rai</h2>
+            <p>Your profile says more than your words</p>
+        </div>
+        <div class="info-box">
+            <div class="info-group">Name : <span id="spanName">Ritu Maya Rai</span></div>
+            <div class="info-group">Email : <span id="spanEmail">admin@email.com</span></div>
+            <div class="info-group">Phone : <span id="spanPhone">77848491</span></div>
+            <div class="info-group">Role : Admin</div>
+        </div>
+        <button class="edit-btn" onclick="location.href='editprofile.html'">Edit Profile</button>
+    </main>
+
+    <script>
+        // 1. Load Data
+        window.onload = function() {
+            const data = JSON.parse(localStorage.getItem('userProfile'));
+            if (data) {
+                const fullName = data.fName + " " + data.lName;
+                document.getElementById('viewName').innerText = fullName;
+                document.getElementById('spanName').innerText = fullName;
+                document.getElementById('spanEmail').innerText = data.email;
+                document.getElementById('spanPhone').innerText = data.phone;
+            }
+
+            // 2. BACK BUTTON LOGIC
+            // This forces the back button to go to dashboard.html
+            history.pushState(null, null, location.href);
+            window.onpopstate = function () {
+                window.location.href = 'dashboard.html';
+            };
+        };
+    </script>
+</body>
+</html>
