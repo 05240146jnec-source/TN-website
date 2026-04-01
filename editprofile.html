@@ -11,24 +11,26 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-light); }
         .top-bar { height: 75px; background-color: #d9d9d9; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; }
-        .logo span { color: var(--primary-green); font-weight: 800; font-size: 18px; }
-        .logo { text-decoration: none; color: black; }
+        .logo { text-decoration: none; color: black; font-weight: 800; font-size: 18px; }
+        .logo span { color: var(--primary-green); }
         .avatar-circle { width: 35px; height: 35px; background-color: var(--primary-green); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .container { max-width: 680px; margin: 30px auto; text-align: center; }
         .container h2 { font-family: 'Playfair Display', serif; font-size: 26px; }
         .container p { font-family: 'Playfair Display', serif; font-size: 16px; margin-bottom: 25px; }
-        .card { background: white; border: 1px solid var(--border-grey); border-radius: 15px; padding: 40px; text-align: left; }
+        .card { background: white; border: 1px solid var(--border-grey); border-radius: 15px; padding: 40px; text-align: left; position: relative; }
+        .close-icon { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: #333; }
         .form-row { display: flex; gap: 20px; }
         .form-group { flex: 1; margin-bottom: 15px; }
         label { display: block; font-family: 'Playfair Display', serif; font-size: 18px; font-weight: bold; margin-bottom: 8px; }
         input { width: 100%; padding: 12px 15px; border: 1px solid var(--border-grey); border-radius: 10px; font-size: 16px; outline: none; }
         .save-btn { width: 100%; padding: 16px; background-color: var(--primary-green); color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: 700; cursor: pointer; margin-top: 10px; }
 
+        /* MODAL STYLE */
         .prompt-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .prompt-box { background: white; padding: 40px; border-radius: 15px; width: 400px; text-align: center; border: 1px solid #999; }
+        .prompt-box { background: white; padding: 40px; border-radius: 15px; width: 420px; text-align: center; border: 1px solid #999; }
         .prompt-box h3 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 25px; }
-        .prompt-buttons { display: flex; gap: 20px; justify-content: center; }
-        .p-btn { padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; font-size: 16px; }
+        .prompt-buttons { display: flex; gap: 15px; justify-content: center; }
+        .p-btn { padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; font-size: 15px; }
         .p-yes { background-color: var(--primary-green); color: white; }
         .p-no { background-color: #ddd; color: #333; }
     </style>
@@ -43,6 +45,8 @@
         <h2>Edit Your Account</h2>
         <p>Your profile says more than your words</p>
         <div class="card">
+            <!-- X Button triggers EXIT prompt -->
+            <i class="fa-solid fa-circle-xmark close-icon" id="closeX"></i>
             <form id="editForm">
                 <div class="form-row">
                     <div class="form-group"><label>First Name</label><input type="text" id="fName"></div>
@@ -57,18 +61,32 @@
         </div>
     </div>
 
-    <div class="prompt-overlay" id="prompt">
+    <!-- SAVE PROMPT (Are you sure?) -->
+    <div class="prompt-overlay" id="savePrompt">
         <div class="prompt-box">
             <h3>Are you sure?</h3>
             <div class="prompt-buttons">
-                <button class="p-btn p-yes" id="yesBtn">Yes</button>
-                <button class="p-btn p-no" id="noBtn">No</button>
+                <button class="p-btn p-yes" id="confirmSave">Yes</button>
+                <button class="p-btn p-no" id="cancelSave">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXIT PROMPT (Keep Editing / Cancel) -->
+    <div class="prompt-overlay" id="exitPrompt">
+        <div class="prompt-box">
+            <h3>Do you want to discard changes?</h3>
+            <div class="prompt-buttons">
+                <button class="p-btn p-yes" id="keepEditing">Keep Editing</button>
+                <button class="p-btn p-no" id="exitCancel">Yes, cancel</button>
             </div>
         </div>
     </div>
 
     <script>
-        const prompt = document.getElementById('prompt');
+        const savePrompt = document.getElementById('savePrompt');
+        const exitPrompt = document.getElementById('exitPrompt');
+
         window.onload = function() {
             const data = JSON.parse(localStorage.getItem('userProfile')) || { fName: "Ritu Maya", lName: "Rai", email: "admin@email.com", phone: "77848491" };
             document.getElementById('fName').value = data.fName;
@@ -77,18 +95,19 @@
             document.getElementById('phone').value = data.phone;
         };
 
-        document.getElementById('editForm').addEventListener('submit', function(e) {
+        // SAVE BUTTON LOGIC
+        document.getElementById('editForm').onsubmit = function(e) {
             e.preventDefault();
             if (!document.getElementById('fName').value || !document.getElementById('lName').value || !document.getElementById('email').value || !document.getElementById('phone').value || !document.getElementById('currPass').value) {
                 alert("Please fill all the credentials.");
                 return;
             }
-            prompt.style.display = 'flex';
-        });
+            savePrompt.style.display = 'flex';
+        };
 
-        document.getElementById('noBtn').onclick = () => prompt.style.display = 'none';
+        document.getElementById('cancelSave').onclick = () => savePrompt.style.display = 'none';
 
-        document.getElementById('yesBtn').onclick = function() {
+        document.getElementById('confirmSave').onclick = function() {
             const updated = {
                 fName: document.getElementById('fName').value,
                 lName: document.getElementById('lName').value,
@@ -96,10 +115,17 @@
                 phone: document.getElementById('phone').value
             };
             localStorage.setItem('userProfile', JSON.stringify(updated));
-            
-            // replaceState ensures the "Edit Profile" page is removed from history
             window.location.replace("profile.html");
         };
+
+        // CROSS (X) BUTTON LOGIC
+        document.getElementById('closeX').onclick = () => exitPrompt.style.display = 'flex';
+        
+        // "Keep Editing" stays on page
+        document.getElementById('keepEditing').onclick = () => exitPrompt.style.display = 'none';
+        
+        // "Cancel" goes back to profile
+        document.getElementById('exitCancel').onclick = () => window.location.href = "profile.html";
     </script>
 </body>
 </html>
