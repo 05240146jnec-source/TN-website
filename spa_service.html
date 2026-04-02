@@ -3,542 +3,576 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TN Admin | Interactive Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <title>TN ADMIN - Dashboard & Spa</title>
     
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
-            --primary-green: #004d26;
-            --bg-body: #ffffff;
-            --card-gray: #f4f4f4;
-            --topbar-gray: #dbdbdb;
-            --input-fill: #e8e8e8;
-            --topbar-height: 70px;
-            --sidebar-width: 260px;
-            --toggle-blue: #2196F3;
+            --primary-green: #005a2b;
+            --bg-light: #ffffff;
+            --card-bg: #f5f6f7;
+            --border-line: #e0e0e0;
+            --text-black: #000000;
+            --top-bar-grey: #f8f9fa;
+            --input-gray: #e9e9e9; 
         }
 
         * {
             margin: 0; padding: 0; box-sizing: border-box;
-            font-family: 'Playfair Display', serif;
+            font-family: 'Inter', sans-serif;
         }
 
-        body { background-color: var(--bg-body); display: flex; height: 100vh; overflow: hidden; }
+        body, html { height: 100%; overflow: hidden; background-color: white; }
 
-        /* --- TOP BAR --- */
-        .topbar {
-            position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-height);
-            background: var(--topbar-gray); display: flex; justify-content: space-between;
-            align-items: center; padding: 0 40px; z-index: 1000;
-        }
-        .logo { font-size: 20px; font-weight: 700; cursor: pointer; color: black; text-decoration: none; }
-        .logo span { color: var(--primary-green); }
-        .user-profile { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        .avatar { background: var(--primary-green); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .wrapper { display: flex; height: 100vh; width: 100%; }
 
         /* --- SIDEBAR --- */
         .sidebar {
-            width: var(--sidebar-width); background: white; position: fixed;
-            top: var(--topbar-height); bottom: 0; left: 0; padding: 30px 20px;
-            border-right: 1px solid #f0f0f0; display: flex; flex-direction: column;
-            z-index: 999; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 320px; background: white; display: flex; flex-direction: column;
+            padding: 40px 0; border-right: 1.5px solid var(--border-line); height: 100%; 
         }
-        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 15px; flex-grow: 1; }
-        
+        .logo-area {
+            padding: 0 40px; margin-bottom: 70px; font-size: 22px; font-weight: 800;
+            text-decoration: none; color: var(--text-black);
+        }
+        .logo-area span { color: var(--primary-green); }
+        .nav-links { list-style: none; padding: 0 25px; flex-grow: 1; }
         .nav-item {
-            display: flex; align-items: center; padding: 12px 18px; text-decoration: none;
-            color: black; font-size: 16px; font-weight: 700; border-radius: 50px;
-            transition: 0.2s; cursor: pointer; border: none; background: none; width: 100%;
+            display: flex; align-items: center; padding: 14px 25px; margin-bottom: 10px;
+            cursor: pointer; border-radius: 50px; font-weight: 700; color: var(--text-black);
+            text-decoration: none; transition: 0.3s; border: none; background: none; width: 100%;
             text-align: left;
         }
-        .nav-item i { margin-right: 12px; width: 20px; text-align: center; }
-        .nav-item:hover { background-color: #f5f5f5; }
+        .nav-item i { margin-right: 20px; font-size: 22px; width: 30px; text-align: center; }
+        .nav-item:hover { background-color: #f1f3f5; }
         .nav-item.active { background-color: var(--primary-green) !important; color: white !important; }
 
-        /* --- MAIN CONTENT --- */
-        .main-content {
-            margin-left: var(--sidebar-width); margin-top: var(--topbar-height);
-            flex-grow: 1; padding: 60px 80px; overflow-y: auto; width: 100%;
-            background: white; transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        /* --- MAIN CONTAINER --- */
+        .main-container { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+
+        .top-bar {
+            height: 100px; display: flex; justify-content: center; align-items: center;
+            padding: 0 60px; background-color: var(--top-bar-grey); 
+            border-bottom: 1.5px solid var(--border-line); position: relative;
+        }
+        .top-bar h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin: 0; }
+
+        .admin-profile-dropdown { position: absolute; right: 60px; }
+        .admin-profile {
+            display: flex; align-items: center; gap: 12px; background: white;
+            padding: 8px 18px 8px 8px; border-radius: 50px; border: 1px solid var(--border-line);
+            cursor: pointer;
+        }
+        .avatar { width: 32px; height: 32px; background-color: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        .content-area { padding: 40px 60px; flex-grow: 1; overflow-y: auto; }
+
+        /* --- DASHBOARD STAT CARDS --- */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; width: 100%; }
+        .stat-card {
+            background-color: var(--card-bg); border-radius: 12px; padding: 60px 40px;
+            text-align: center; position: relative; transition: 0.3s; text-decoration: none; color: inherit;
+        }
+        .stat-card h3 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 15px; font-weight: 700; }
+        .stat-card .stat-number { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 700; color: var(--primary-green); }
+
+        /* --- SPA FILTER BAR --- */
+        .spa-filter-wrapper {
+            background-color: #f0f0f0; 
+            padding: 12px 20px;
+            border-radius: 15px;
+            margin-bottom: 35px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
-        .content-section { display: none; }
-        .active-section { display: block; }
+        .filter-group { 
+            display: flex; 
+            gap: 10px; 
+            overflow-x: auto; 
+            flex-wrap: nowrap; 
+            flex: 1;
+            scroll-behavior: smooth;
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+        }
+        .filter-group::-webkit-scrollbar { display: none; }
 
-        /* --- DASHBOARD GRID --- */
-        .dashboard-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; }
-        .card { background-color: var(--card-gray); border-radius: 12px; padding: 55px 40px; position: relative; color: black; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 220px; cursor: pointer; }
-        .stat-number { font-size: 36px; font-weight: 900; color: var(--primary-green); }
-        .card-icon { position: absolute; top: 25px; right: 25px; font-size: 26px; }
-        .wide-card { grid-column: 1; }
+        .filter-pill {
+            background: white; border: none; padding: 10px 24px; border-radius: 50px;
+            font-weight: 600; font-size: 14px; color: #333; transition: 0.3s; 
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .filter-pill.active { background-color: var(--primary-green); color: white; }
 
-        /* --- SPA SERVICE STYLING --- */
-        .spa-container { max-width: 1000px; }
-        .spa-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 5px; }
-        .spa-header p { font-size: 18px; margin-bottom: 40px; color: #555; }
-        
+        .btn-add-service-main {
+            background-color: var(--primary-green); color: white; border: none;
+            padding: 10px 22px; border-radius: 50px; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        /* --- SPA CARDS --- */
         .service-card { 
-            background: white; border: 1px solid #ddd; border-radius: 15px; 
-            padding: 25px; position: relative; transition: 0.3s ease;
+            background: white; border: 1px solid #ddd; border-radius: 20px; 
+            padding: 30px; transition: 0.3s; height: 100%;
         }
-        .service-card:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .category-tag { 
             color: var(--primary-green); border: 1px solid var(--primary-green); 
-            padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; 
+            padding: 4px 15px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase;
         }
 
-        /* Category Filter Buttons */
-        .filter-btn {
-            padding: 8px 20px; border-radius: 25px; border: 1px solid #ddd;
-            background: white; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s;
+        /* --- EDIT & ADD SERVICE PAGE --- */
+        .edit-card-container {
+            background: white; border-radius: 15px; padding: 35px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); max-width: 850px; margin: 0 auto;
         }
-        .filter-btn.active { background: var(--primary-green); color: white; border-color: var(--primary-green); }
-
-        /* --- TOGGLE SWITCH STYLING --- */
-        .status-container {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;
-        }
-        .status-label { font-size: 14px; color: #444; font-weight: 600; }
-        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--toggle-blue); }
-        input:checked + .slider:before { transform: translateX(22px); }
-
-        /* --- FORM STYLING --- */
-        .spa-form-row { display: flex; gap: 40px; margin-bottom: 25px; }
-        .spa-form-group { flex: 1; display: flex; flex-direction: column; }
-        .spa-form-group label { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
-        .spa-input { background-color: var(--input-fill); border: none; border-radius: 12px; padding: 16px 20px; font-size: 16px; outline: none; width: 100%; }
-        textarea.spa-input { resize: none; height: 120px; }
+        .edit-card-container h3 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 5px; }
+        .edit-card-container .subtitle { color: #555; margin-bottom: 30px; font-size: 15px; }
         
-        .spa-btn-group { display: flex; justify-content: flex-end; gap: 20px; margin-top: 40px; }
-        .spa-btn { padding: 12px 45px; border-radius: 12px; font-size: 18px; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
-        .btn-cancel { background-color: #e0e0e0; color: black; }
-        .btn-save { background-color: var(--primary-green); color: white; }
+        .spa-label { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 17px; margin-bottom: 10px; display: block; }
+        
+        .spa-input-gray {
+            background-color: var(--input-gray) !important; border: 1px solid transparent !important;
+            border-radius: 12px !important; padding: 12px 20px !important; width: 100%; outline: none;
+        }
+        #spa-name { border: 1.5px solid #c2dbd0 !important; }
 
-        /* --- DELETE VIEW SPECIAL STYLING --- */
-        .delete-card-confirm { background: white; border: 1px solid #ddd; border-radius: 20px; padding: 40px 60px; text-align: left; max-width: 600px; }
+        .btn-edit-cancel, .btn-add-cancel {
+            background-color: var(--input-gray) !important; color: black !important;
+            border: none !important; border-radius: 12px !important; padding: 10px 45px !important;
+            font-family: 'Playfair Display', serif !important; font-weight: 600 !important; font-size: 17px !important;
+        }
+        
+        .btn-edit-save, .btn-add-submit {
+            background-color: var(--primary-green) !important; color: white !important;
+            border: none !important; border-radius: 12px !important; padding: 10px 45px !important;
+            font-family: 'Playfair Display', serif !important; font-weight: 600 !important; font-size: 17px !important;
+            transition: 0.3s;
+        }
+        .btn-edit-save:hover, .btn-add-submit:hover { background-color: #004420 !important; }
+        .btn-edit-cancel:hover, .btn-add-cancel:hover { background-color: #ddd !important; }
 
-        /* --- PROFILE & EDIT STYLING --- */
-        .profile-container { max-width: 750px; margin: 0 auto; text-align: center; }
-        .info-box { background-color: #f4f4f4; border: 1px solid #ddd; border-radius: 20px; padding: 60px; text-align: left; margin-bottom: 30px; }
-        .info-item { font-size: 20px; font-weight: 700; margin-bottom: 25px; }
-        .edit-card { background-color: white; border: 1px solid #ddd; border-radius: 20px; padding: 40px 60px; text-align: left; }
-        input:not(.spa-input) { border: 1.5px solid #ddd; border-radius: 12px; padding: 12px; font-size: 16px; outline: none; width: 100%; }
-        .save-btn { background-color: var(--primary-green); color: white; border: none; border-radius: 15px; padding: 16px; width: 100%; font-size: 20px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        /* Upload Placeholder Style */
+        .upload-box {
+            background-color: var(--input-gray); border-radius: 12px; height: 52px;
+            display: flex; align-items: center; justify-content: center; color: #333; cursor: pointer;
+            overflow: hidden; padding: 0 15px;
+        }
+
+        /* --- DELETE MODAL STYLING --- */
+        .modal-delete-content { border-radius: 15px; padding: 25px; border: none; }
+        .modal-delete-title { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 18px; margin-bottom: 15px; }
+        .modal-delete-body { font-size: 15px; color: #333; margin-bottom: 30px; }
+        .btn-modal-cancel { border: 1px solid #ccc; background: white; padding: 8px 30px; border-radius: 10px; font-weight: 600; width: 120px; }
+        .btn-modal-delete { background-color: #dc3545 !important; color: white !important; border: none; padding: 8px 30px; border-radius: 10px; font-weight: 600; width: 120px; }
 
         /* --- TOAST --- */
-        .toast { position: fixed; bottom: 30px; right: 30px; background: #333; color: white; padding: 15px 30px; border-radius: 8px; font-weight: 600; display: none; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .toast-custom { 
+            position: fixed; bottom: 30px; right: 30px; background: #333; 
+            color: white; padding: 15px 30px; border-radius: 12px; 
+            display: none; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+        }
+        .cursor-pointer { cursor: pointer; }
+
     </style>
 </head>
 <body>
 
-    <header class="topbar">
-        <div class="logo" onclick="navigateTo('dashboard')"><span>TN</span> ADMIN</div>
-        <div class="user-profile" onclick="navigateTo('profile')">
-            <div class="avatar">A</div>
-            <span><b id="top-name">Admin</b></span>
-        </div>
-    </header>
+    <div class="wrapper">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <a href="#" class="logo-area" onclick="showSection('dashboard', this)">
+                <span>TN</span> ADMIN
+            </a>
+            <nav class="nav-links">
+                <button class="nav-item active" onclick="showSection('dashboard', this)"><i class="fa-solid fa-table-cells-large"></i> Dashboard</button>
+                <button class="nav-item" onclick="showSection('bookings', this)"><i class="fa-solid fa-calendar-check"></i> Bookings</button>
+                <button class="nav-item" onclick="showSection('menu', this)"><i class="fa-solid fa-utensils"></i> Restaurant Menu</button>
+                <button class="nav-item" onclick="showSection('rooms', this)"><i class="fa-solid fa-bed"></i> Rooms</button>
+                <button class="nav-item" onclick="showSection('spa', this)"><i class="fa-solid fa-spa"></i> Spa Services</button>
+                <button class="nav-item" onclick="showSection('user', this)"><i class="fa-solid fa-circle-user"></i> User</button>
+                <button class="nav-item" onclick="showSection('feedback', this)"><i class="fa-solid fa-comments"></i> Feedback</button>
+            </nav>
+        </aside>
 
-    <aside id="main-sidebar" class="sidebar">
-        <nav class="nav-links">
-            <button class="nav-item" id="btn-dashboard" onclick="navigateTo('dashboard')"><i class="fa-solid fa-table-cells-large"></i> Dashboard</button>
-            <button class="nav-item" id="btn-bookings" onclick="navigateTo('bookings')"><i class="fa-solid fa-calendar-check"></i> Bookings</button>
-            <button class="nav-item" id="btn-menu" onclick="navigateTo('menu')"><i class="fa-solid fa-utensils"></i> Restaurant Menu</button>
-            <button class="nav-item" id="btn-rooms" onclick="navigateTo('rooms')"><i class="fa-solid fa-bed"></i> Rooms</button>
-            <button class="nav-item" id="btn-spa" onclick="navigateTo('spa')"><i class="fa-solid fa-spa"></i> Spa Services</button>
-            <button class="nav-item" id="btn-user" onclick="navigateTo('user')"><i class="fa-solid fa-circle-user"></i> User</button>
-            <button class="nav-item" id="btn-feedback" onclick="navigateTo('feedback')"><i class="fa-solid fa-comment-dots"></i> Feedback</button>
-            <a href="#" class="nav-item" onclick="showToast('Redirecting...')"><i class="fa-solid fa-circle-arrow-left"></i> Back to site</a>
-        </nav>
-    </aside>
-
-    <main class="main-content" id="main-content">
-        <section id="dashboard" class="content-section">
-            <div class="dashboard-grid">
-                <div class="card wide-card" onclick="navigateTo('bookings')">
-                    <div class="card-icon"><i class="fa-regular fa-calendar-check"></i></div>
-                    <h2>Total bookings</h2><p class="stat-number">1,245</p>
-                </div>
-                <div class="card" onclick="navigateTo('user')">
-                    <div class="card-icon"><i class="fa-regular fa-circle-user"></i></div>
-                    <h2>Registered Users</h2><p class="stat-number">482</p>
-                </div>
-                <div class="card wide-card" onclick="navigateTo('feedback')">
-                    <div class="card-icon"><i class="fa-regular fa-comments"></i></div>
-                    <h2>Total Feedback</h2><p class="stat-number">95</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="spa" class="content-section">
-            <div class="spa-container">
+        <div class="main-container">
+            <header class="top-bar">
+                <h1 id="page-title">Dashboard</h1>
                 
-                <div id="spa-list-view">
-                    <div class="spa-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h2>Spa Services</h2>
-                            <p>Manage your available treatments</p>
+                <div class="admin-profile-dropdown dropdown">
+                    <div class="admin-profile dropdown-toggle" id="adminDropdown" data-bs-toggle="dropdown">
+                        <div class="avatar">A</div>
+                        <strong style="font-size: 13px;">Admin</strong>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 15px;">
+                        <li><a class="dropdown-item py-2" href="#">Profile Setting</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2 text-danger" href="#" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal">Log Out</a></li>
+                    </ul>
+                </div>
+            </header>
+
+            <main class="content-area">
+                
+                <!-- SECTION: DASHBOARD -->
+                <section id="section-dashboard">
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <i class="fa-regular fa-calendar-check" style="position:absolute; top:25px; right:25px; font-size: 24px; color: #888;"></i>
+                            <h3>Total bookings</h3>
+                            <div class="stat-number">1,245</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fa-regular fa-circle-user" style="position:absolute; top:25px; right:25px; font-size: 24px; color: #888;"></i>
+                            <h3>Registered Users</h3>
+                            <div class="stat-number">482</div>
                         </div>
                     </div>
+                </section>
 
-                    <div style="display: flex; gap: 15px; margin-bottom: 30px; align-items: center;">
-                        <button class="filter-btn active" onclick="filterSpa('all', this)">All services</button>
-                        <button class="filter-btn" onclick="filterSpa('Massage', this)">Massage</button>
-                        <button class="filter-btn" onclick="filterSpa('Facial', this)">Facial</button>
-                        <button class="filter-btn" onclick="filterSpa('Body', this)">Body</button>
-                        <button class="filter-btn" onclick="filterSpa('Package', this)">Package</button>
-                        <button class="spa-btn btn-save" style="padding: 10px 25px; font-size: 14px; margin-left: auto;" onclick="toggleSpaAdd(true)">+ Add service</button>
-                    </div>
+                <!-- SECTION: SPA SERVICES -->
+                <section id="section-spa" style="display: none;">
+                    
+                    <!-- 1. LIST VIEW -->
+                    <div id="spa-list-view">
+                        <h2 class="fw-bold mb-4" style="font-family: 'Playfair Display';">Spa Services</h2>
 
-                    <div id="spa-cards-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
-                        <div class="service-card" id="card-swedish" data-category="Massage">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span class="category-tag">Massage</span>
-                                <div style="display: flex; gap: 15px; color: #666; cursor: pointer;">
-                                    <i class="fa-solid fa-pencil" onclick="toggleSpaEdit(true)"></i>
-                                    <i class="fa-solid fa-trash-can" onclick="showDeleteConfirmation('card-swedish', 'Swedish Massage')"></i>
+                        <div class="spa-filter-wrapper">
+                            <div class="filter-group" id="spa-filters">
+                                <button class="filter-pill active" onclick="filterSpa('All Service', this)">All Service</button>
+                                <button class="filter-pill" onclick="filterSpa('Sauna', this)">Sauna</button>
+                                <button class="filter-pill" onclick="filterSpa('Beauty', this)">Beauty</button>
+                                <button class="filter-pill" onclick="filterSpa('Yangzin Packages Treatments', this)">Yangzin Packages Treatments</button>
+                                <button class="filter-pill" onclick="filterSpa('Enhanement', this)">Enhanement</button>
+                                <button class="filter-pill" onclick="filterSpa('Body Treatment', this)">Body Treatment</button>
+                                <button class="filter-pill" onclick="filterSpa('Massage', this)">Massage</button>
+                                <button class="filter-pill" onclick="filterSpa('Facials & Skincare', this)">Facials & Skincare</button>
+                            </div>
+                            <button class="btn-add-service-main" onclick="toggleSpaAdd(true)">
+                                <i class="fa-solid fa-plus-circle"></i> Add service
+                            </button>
+                        </div>
+
+                        <div id="spa-cards-grid" class="row g-4">
+                            <div class="col-md-6 spa-card-item" data-category="Massage">
+                                <div class="service-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <span class="category-tag">Massage</span>
+                                        <div class="d-flex gap-3 text-secondary">
+                                            <i class="fa-solid fa-pencil cursor-pointer" onclick="toggleSpaEdit(true)"></i>
+                                            <!-- MODIFIED: Added onclick to prepare deletion -->
+                                            <i class="fa-solid fa-trash-can cursor-pointer" onclick="prepareDelete(this)" data-bs-toggle="modal" data-bs-target="#deleteServiceModal"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="mt-3 mb-1 fw-bold" style="font-family: 'Playfair Display';">Swedish Massage</h3>
+                                    <p class="text-muted small">Classic full-body relaxation.</p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mt-4 border-top pt-3">
+                                        <div class="d-flex align-items-center gap-2 text-muted">
+                                            <i class="fa-regular fa-clock"></i>
+                                            <span style="font-size: 14px;">60 min</span>
+                                        </div>
+                                        <span class="fw-bold" style="color: var(--primary-green); font-size: 1rem;">Nu. 2,500</span>
+                                    </div>
                                 </div>
                             </div>
-                            <h3 style="margin: 15px 0 5px;">Swedish Massage</h3>
-                            <p style="color: #666; font-size: 14px;">Gentle full-body massage for relaxation and stress relief</p>
-                            <div style="display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px; font-weight: 700;">
-                                <span><i class="fa-regular fa-clock"></i> 60 min</span>
-                                <span>Nu. 2500</span>
-                            </div>
-                            <div class="status-container">
-                                <span class="status-label">Accepting booking</span>
-                                <label class="switch">
-                                    <input type="checkbox" checked onchange="showToast('Swedish Massage status updated')">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
                         </div>
+                    </div>
 
-                        <div class="service-card" id="card-deep" data-category="Massage">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span class="category-tag">Massage</span>
-                                <div style="display: flex; gap: 15px; color: #666; cursor: pointer;">
-                                    <i class="fa-solid fa-pencil" onclick="toggleSpaEdit(true)"></i>
-                                    <i class="fa-solid fa-trash-can" onclick="showDeleteConfirmation('card-deep', 'Deep Tissue Massage')"></i>
+                    <!-- 2. EDIT VIEW -->
+                    <div id="spa-edit-view" style="display: none;">
+                        <div class="edit-card-container">
+                            <h3>Edit Service</h3>
+                            <p class="subtitle">Update the services details</p>
+
+                            <div class="row mb-4">
+                                <div class="col-md-7">
+                                    <label class="spa-label">Service Name</label>
+                                    <input type="text" id="spa-name" class="spa-input-gray" value="Swedish Massage">
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="spa-label">Price</label>
+                                    <input type="text" id="spa-price" class="spa-input-gray" value="Nu. 2500">
                                 </div>
                             </div>
-                            <h3 style="margin: 15px 0 5px;">Deep Tissue Massage</h3>
-                            <p style="color: #666; font-size: 14px;">Target deep muscle layers for chronic pain relief</p>
-                            <div style="display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px; font-weight: 700;">
-                                <span><i class="fa-regular fa-clock"></i> 90 min</span>
-                                <span>Nu. 3500</span>
-                            </div>
-                            <div class="status-container">
-                                <span class="status-label">Accepting booking</span>
-                                <label class="switch">
-                                    <input type="checkbox" onchange="showToast('Deep Tissue status updated')">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div id="spa-add-view" style="display: none;">
-                    <div class="spa-header">
-                        <h2>Add spa service</h2>
-                        <p>Add the spa services details below</p>
-                    </div>
-                    <div class="spa-form-row">
-                        <div class="spa-form-group">
-                            <label>Service name</label>
-                            <input type="text" id="add-spa-name" class="spa-input" value="Facial">
-                        </div>
-                        <div class="spa-form-group">
-                            <label>Upload Image</label>
-                            <div class="spa-input" style="display: flex; justify-content: center; align-items: center; cursor: pointer; height: 55px;">
-                                <i class="fa-solid fa-upload"></i>
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <label class="spa-label">Description</label>
+                                    <textarea id="spa-desc" class="spa-input-gray" rows="2">Classic full-body relaxation.</textarea>
+                                </div>
+                            </div>
+
+                            <div class="row mb-5">
+                                <div class="col-md-4">
+                                    <label class="spa-label">Duration</label>
+                                    <input type="text" id="spa-duration" class="spa-input-gray" value="60 min">
+                                </div>
+                                <div class="col-md-6 ms-auto">
+                                    <label class="spa-label">Category</label>
+                                    <select id="spa-category-select" class="spa-input-gray" style="appearance: auto;">
+                                        <option value="Sauna">Sauna</option>
+                                        <option value="Beauty">Beauty</option>
+                                        <option value="Yangzin Packages Treatments">Yangzin Packages Treatments</option>
+                                        <option value="Enhanement">Enhanement</option>
+                                        <option value="Body Treatment">Body Treatment</option>
+                                        <option value="Massage" selected>Massage</option>
+                                        <option value="Facials & Skincare">Facials & Skincare</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-3">
+                                <button class="btn-edit-cancel" onclick="toggleSpaEdit(false)">Cancel</button>
+                                <button class="btn-edit-save" onclick="handleSpaUpdate()">Save</button>
                             </div>
                         </div>
                     </div>
-                    <div class="spa-form-row">
-                        <div class="spa-form-group">
-                            <label>Price(Nu)</label>
-                            <input type="number" id="add-spa-price" class="spa-input" value="3000">
-                        </div>
-                        <div class="spa-form-group">
-                            <label>Category</label>
-                            <select id="add-spa-cat" class="spa-input" style="appearance: none;">
-                                <option value="Massage" selected>Massage</option>
-                                <option value="Facial">Facial</option>
-                                <option value="Body">Body</option>
-                                <option value="Package">Package</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="spa-btn-group">
-                        <button class="spa-btn btn-cancel" onclick="toggleSpaAdd(false)">Cancel</button>
-                        <button class="spa-btn btn-save" onclick="saveNewService()">Add service</button>
-                    </div>
-                </div>
 
-                <div id="spa-delete-view" style="display: none;">
-                    <div class="spa-header">
-                        <h2>Delete Service</h2>
-                        <p>Are you sure you want to delete this service?</p>
-                    </div>
-                    <div class="delete-card-confirm">
-                        <p style="font-size: 20px; margin-bottom: 30px;">You are deleting: <b id="del-name-display"></b></p>
-                        <div style="display: flex; gap: 20px;">
-                            <button class="spa-btn btn-cancel" onclick="cancelDelete()">Cancel</button>
-                            <button class="spa-btn btn-save" onclick="executeDelete()">Delete</button>
+                    <!-- 3. ADD VIEW -->
+                    <div id="spa-add-view" style="display: none;">
+                        <div class="edit-card-container">
+                            <h3>Add spa service</h3>
+                            <p class="subtitle">Add the spa services details below</p>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="spa-label">Service name</label>
+                                    <input type="text" id="add-spa-name" class="spa-input-gray" placeholder="Facial">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="spa-label">Upload Image</label>
+                                    <div class="upload-box" onclick="document.getElementById('spa-image-input').click()">
+                                        <i class="fa-solid fa-arrow-up-from-bracket" id="upload-icon"></i>
+                                        <span id="file-name-text" style="margin-left:10px; font-size:12px; color:#555; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></span>
+                                    </div>
+                                    <input type="file" id="spa-image-input" style="display: none;" accept="image/*" onchange="displaySelectedFile(this)">
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="spa-label">Price(Nu)</label>
+                                    <input type="number" id="add-spa-price" class="spa-input-gray" placeholder="3000">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="spa-label">Category</label>
+                                    <select id="add-spa-category" class="spa-input-gray" style="appearance: auto;">
+                                        <option value="">Select Category</option>
+                                        <option value="Sauna">Sauna</option>
+                                        <option value="Beauty">Beauty</option>
+                                        <option value="Yangzin Packages Treatments">Yangzin Packages Treatments</option>
+                                        <option value="Enhanement">Enhanement</option>
+                                        <option value="Body Treatment">Body Treatment</option>
+                                        <option value="Massage">Massage</option>
+                                        <option value="Facials & Skincare">Facials & Skincare</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row mb-5">
+                                <div class="col-md-6">
+                                    <label class="spa-label">Duration</label>
+                                    <input type="text" id="add-spa-duration" class="spa-input-gray" placeholder="e.g. 60 min">
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-center gap-3">
+                                <button class="btn-add-cancel" onclick="toggleSpaAdd(false)">Cancel</button>
+                                <button class="btn-add-submit" onclick="handleSpaAdd()">Add service</button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div id="spa-edit-view" style="display: none;">
-                    <div class="spa-header"><h2>Edit Service</h2><p>Update the service details below</p></div>
-                    <div class="spa-form-row">
-                        <div class="spa-form-group"><label>Service Name</label><input type="text" id="spa-name" class="spa-input" value="Swedish massage"></div>
-                        <div class="spa-form-group" style="flex: 0.4;"><label>Price</label><input type="text" id="spa-price" class="spa-input" value="Nu. 2500"></div>
-                    </div>
-                    <div class="spa-form-group" style="margin-bottom: 25px;"><label>Description</label><textarea id="spa-desc" class="spa-input">Gentle full body massage for relaxation and stress relief</textarea></div>
-                    <div class="spa-form-row">
-                        <div class="spa-form-group"><label>Duration</label><input type="text" id="spa-dur" class="spa-input" value="60 min"></div>
-                        <div class="spa-form-group"><label>Category</label><input type="text" id="spa-cat" class="spa-input" value="Massage"></div>
-                    </div>
-                    <div class="spa-btn-group">
-                        <button class="spa-btn btn-cancel" onclick="handleCancel('spa')">Cancel</button>
-                        <button class="spa-btn btn-save" onclick="handleSpaUpdate()">Save Changes</button>
-                    </div>
+                <section id="section-bookings" style="display:none;"><h2>Bookings</h2></section>
+                <section id="section-menu" style="display:none;"><h2>Restaurant Menu</h2></section>
+                <section id="section-rooms" style="display:none;"><h2>Rooms</h2></section>
+                <section id="section-user" style="display:none;"><h2>Users</h2></section>
+                <section id="section-feedback" style="display:none;"><h2>Feedback</h2></section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Delete Service Modal -->
+    <div class="modal fade" id="deleteServiceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-delete-content shadow">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="modal-delete-title m-0">Delete service</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-delete-body">
+                    Are you sure? This action cannot be undone.
+                </div>
+                <div class="d-flex justify-content-end gap-3">
+                    <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <!-- MODIFIED: Calls the update delete function -->
+                    <button type="button" class="btn-modal-delete" onclick="confirmDelete()">Delete</button>
                 </div>
             </div>
-        </section>
+        </div>
+    </div>
 
-        <section id="profile" class="content-section">
-            <div class="profile-container">
-                <div style="font-size: 60px; color: #444;"><i class="fa-solid fa-circle-user"></i></div>
-                <h2 style="margin: 10px 0 30px;">Your Profile</h2>
-                <div class="info-box">
-                    <div id="p-name" class="info-item">Name : Ritu Maya Rai</div>
-                    <div id="p-email" class="info-item">Email : admin@email.com</div>
-                    <div id="p-phone" class="info-item">Phone : 77848491</div>
-                    <div class="info-item">Role : Admin</div>
+    <!-- LOGOUT MODAL -->
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center border-0 shadow" style="border-radius: 20px;">
+                <div class="modal-header border-0 justify-content-center pt-4">
+                    <h5 class="modal-title h3" style="font-family: 'Playfair Display'; font-weight: 700;">Log Out?</h5>
                 </div>
-                <button class="save-btn" style="width:auto; padding:15px 60px;" onclick="navigateTo('edit')">Edit Profile</button>
-            </div>
-        </section>
-
-        <section id="edit" class="content-section">
-            <div class="profile-container">
-                <div style="font-size: 60px; color: #444;"><i class="fa-solid fa-circle-user"></i></div>
-                <h2 style="margin: 10px 0 30px;">Edit Your Account</h2>
-                <div class="edit-card">
-                    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-                        <div style="flex:1;"><label style="font-weight:700;">First Name</label><input type="text" id="in-f" value="Ritu Maya"></div>
-                        <div style="flex:1;"><label style="font-weight:700;">Last Name</label><input type="text" id="in-l" value="Rai"></div>
-                    </div>
-                    <div style="margin-bottom: 20px;"><label style="font-weight:700;">Email</label><input type="email" id="in-e" value="admin@email.com"></div>
-                    <div style="margin-bottom: 30px;"><label style="font-weight:700;">Phone</label><input type="text" id="in-ph" value="77848491"></div>
-                    <div style="display:flex; gap:15px;">
-                        <button class="save-btn" style="background:#e0e0e0; color:black;" onclick="navigateTo('profile')">Cancel</button>
-                        <button class="save-btn" onclick="applyChanges()">Save Changes</button>
-                    </div>
+                <div class="modal-footer border-0 justify-content-center pb-4">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">No</button>
+                    <a href="#" class="btn btn-danger rounded-pill px-4" style="text-decoration: none;">Yes, Log Out</a>
                 </div>
             </div>
-        </section>
-        
-        <section id="generic" class="content-section"><h2 id="gen-title">Page</h2><p>Under development.</p></section>
-    </main>
+        </div>
+    </div>
 
-    <div id="toast" class="toast">Action completed!</div>
+    <div id="toast" class="toast-custom">Action completed!</div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let originalSpaData = {};
-        let targetIdToDelete = null;
+        let initialData = {};
+        // NEW: Stores the element we want to delete
+        let itemToDelete = null;
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg; t.style.display = 'block';
-            setTimeout(() => { t.style.display = 'none'; }, 3000);
-        }
-
-        function navigateTo(pageId) {
-            history.pushState({ id: pageId }, "", "#" + pageId);
-            renderPage(pageId);
-        }
-
-        function renderPage(pageId) {
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active-section'));
-            let target = document.getElementById(pageId) || document.getElementById('generic');
-            if (target.id === 'generic') document.getElementById('gen-title').innerText = pageId;
-            target.classList.add('active-section');
-
-            if(pageId === 'spa') {
-                document.getElementById('spa-list-view').style.display = 'block';
-                document.getElementById('spa-edit-view').style.display = 'none';
-                document.getElementById('spa-delete-view').style.display = 'none';
-                document.getElementById('spa-add-view').style.display = 'none'; // Added hide for Add view
+        function showSection(sectionName, element) {
+            document.querySelectorAll('main > section').forEach(section => section.style.display = 'none');
+            const target = document.getElementById('section-' + sectionName);
+            if (target) target.style.display = 'block';
+            document.getElementById('page-title').innerText = sectionName.charAt(0).toUpperCase() + sectionName.slice(1);
+            if (element) {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                element.classList.add('active');
             }
-
-            const sidebar = document.getElementById('main-sidebar');
-            const main = document.getElementById('main-content');
-            if (pageId === 'profile' || pageId === 'edit') {
-                sidebar.style.transform = 'translateX(-100%)'; main.style.marginLeft = '0';
-            } else {
-                sidebar.style.transform = 'translateX(0)'; main.style.marginLeft = 'var(--sidebar-width)';
-            }
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            const activeBtn = document.getElementById('btn-' + pageId);
-            if (activeBtn) activeBtn.classList.add('active');
+            if (sectionName === 'spa') { toggleSpaEdit(false); toggleSpaAdd(false); }
         }
 
-        // --- FILTER SPA ---
         function filterSpa(category, btn) {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.filter-pill').forEach(pill => pill.classList.remove('active'));
             btn.classList.add('active');
-            const cards = document.querySelectorAll('.service-card');
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+            const cards = document.querySelectorAll('.spa-card-item');
             cards.forEach(card => {
-                const cardCat = card.getAttribute('data-category');
-                if (category === 'all' || cardCat === category) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
+                if (category === 'All Service') card.style.display = 'block';
+                else card.style.display = (card.getAttribute('data-category') === category) ? 'block' : 'none';
             });
         }
 
-        // --- ADD LOGIC ---
+        function toggleSpaEdit(show) {
+            document.getElementById('spa-list-view').style.display = show ? 'none' : 'block';
+            document.getElementById('spa-edit-view').style.display = show ? 'block' : 'none';
+            document.getElementById('spa-add-view').style.display = 'none';
+
+            if(show) {
+                initialData = {
+                    name: document.getElementById('spa-name').value,
+                    price: document.getElementById('spa-price').value,
+                    desc: document.getElementById('spa-desc').value,
+                    duration: document.getElementById('spa-duration').value,
+                    category: document.getElementById('spa-category-select').value
+                };
+            }
+        }
+
         function toggleSpaAdd(show) {
             document.getElementById('spa-list-view').style.display = show ? 'none' : 'block';
             document.getElementById('spa-add-view').style.display = show ? 'block' : 'none';
+            document.getElementById('spa-edit-view').style.display = 'none';
+            
             if(show) {
-                // Set default values matching your design requirements
                 document.getElementById('add-spa-name').value = '';
                 document.getElementById('add-spa-price').value = '';
+                document.getElementById('add-spa-category').value = '';
+                document.getElementById('add-spa-duration').value = '';
+                document.getElementById('spa-image-input').value = ''; 
+                document.getElementById('file-name-text').innerText = ''; 
+                document.getElementById('upload-icon').className = "fa-solid fa-arrow-up-from-bracket";
             }
         }
 
-        function saveNewService() {
-            const name = document.getElementById('add-spa-name').value;
-            const price = document.getElementById('add-spa-price').value;
-            const cat = document.getElementById('add-spa-cat').value;
-
-            if (!name || !price) {
-                showToast("Please fill in all fields.");
-                return;
+        function displaySelectedFile(input) {
+            const fileName = input.files[0] ? input.files[0].name : "";
+            const textElement = document.getElementById('file-name-text');
+            const iconElement = document.getElementById('upload-icon');
+            
+            if (fileName) {
+                textElement.innerText = fileName;
+                iconElement.className = "fa-solid fa-circle-check text-success";
             }
-
-            const grid = document.getElementById('spa-cards-grid');
-            const newId = 'card-' + Date.now();
-
-            const cardHTML = `
-                <div class="service-card" id="${newId}" data-category="${cat}">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span class="category-tag">${cat}</span>
-                        <div style="display: flex; gap: 15px; color: #666; cursor: pointer;">
-                            <i class="fa-solid fa-pencil" onclick="toggleSpaEdit(true)"></i>
-                            <i class="fa-solid fa-trash-can" onclick="showDeleteConfirmation('${newId}', '${name}')"></i>
-                        </div>
-                    </div>
-                    <h3 style="margin: 15px 0 5px;">${name}</h3>
-                    <p style="color: #666; font-size: 14px;">Professional treatment service</p>
-                    <div style="display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px; font-weight: 700;">
-                        <span><i class="fa-regular fa-clock"></i> 45 min</span>
-                        <span>Nu. ${price}</span>
-                    </div>
-                    <div class="status-container">
-                        <span class="status-label">Accepting booking</span>
-                        <label class="switch">
-                            <input type="checkbox" checked onchange="showToast('${name} status updated')">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-            `;
-
-            grid.insertAdjacentHTML('beforeend', cardHTML);
-            showToast(`"${name}" added successfully!`);
-            toggleSpaAdd(false);
-        }
-
-        // --- DELETE LOGIC ---
-        function showDeleteConfirmation(id, name) {
-            targetIdToDelete = id;
-            document.getElementById('del-name-display').innerText = name;
-            document.getElementById('spa-list-view').style.display = 'none';
-            document.getElementById('spa-delete-view').style.display = 'block';
-        }
-
-        function cancelDelete() {
-            document.getElementById('spa-delete-view').style.display = 'none';
-            document.getElementById('spa-list-view').style.display = 'block';
-            targetIdToDelete = null;
-        }
-
-        function executeDelete() {
-            if(targetIdToDelete) {
-                const card = document.getElementById(targetIdToDelete);
-                const name = document.getElementById('del-name-display').innerText;
-                card.remove();
-                showToast(name + " deleted successfully!");
-                cancelDelete();
-            }
-        }
-
-        // --- SPA VIEW LOGIC (EDIT) ---
-        function toggleSpaEdit(showEdit) {
-            const listView = document.getElementById('spa-list-view');
-            const editView = document.getElementById('spa-edit-view');
-            if (showEdit) {
-                listView.style.display = 'none';
-                editView.style.display = 'block';
-                originalSpaData = getSpaInputs();
-            } else {
-                listView.style.display = 'block';
-                editView.style.display = 'none';
-            }
-        }
-
-        function getSpaInputs() {
-            return {
-                name: document.getElementById('spa-name').value,
-                price: document.getElementById('spa-price').value,
-                desc: document.getElementById('spa-desc').value,
-                dur: document.getElementById('spa-dur').value,
-                cat: document.getElementById('spa-cat').value
-            };
         }
 
         function handleSpaUpdate() {
-            const current = getSpaInputs();
-            const isChanged = Object.keys(current).some(k => current[k] !== originalSpaData[k]);
+            const currentData = {
+                name: document.getElementById('spa-name').value,
+                price: document.getElementById('spa-price').value,
+                desc: document.getElementById('spa-desc').value,
+                duration: document.getElementById('spa-duration').value,
+                category: document.getElementById('spa-category-select').value
+            };
+            const isChanged = JSON.stringify(initialData) !== JSON.stringify(currentData);
             if (!isChanged) {
-                showToast("No changes detected.");
+                showToast("No changes detected. Please modify the service details before saving.");
             } else {
-                showToast(`"${current.name}" updated successfully!`);
+                showToast("Changes saved successfully!");
                 toggleSpaEdit(false);
             }
         }
 
-        function handleCancel(type) {
-            toggleSpaEdit(false);
-            showToast("Changes discarded.");
+        function handleSpaAdd() {
+            const name = document.getElementById('add-spa-name').value.trim();
+            const price = document.getElementById('add-spa-price').value.trim();
+            const category = document.getElementById('add-spa-category').value;
+            const duration = document.getElementById('add-spa-duration').value.trim();
+            const image = document.getElementById('spa-image-input').files[0];
+
+            if (!name || !price || !category || !duration || !image) {
+                showToast("Kindly fill in all the required details, including an image, to proceed.");
+            } else {
+                showToast("Service added successfully!");
+                toggleSpaAdd(false);
+            }
         }
 
-        // --- PROFILE LOGIC ---
-        function applyChanges() {
-            const f = document.getElementById('in-f').value, l = document.getElementById('in-l').value;
-            document.getElementById('p-name').innerText = "Name : " + f + " " + l;
-            document.getElementById('top-name').innerText = f + " " + l;
-            navigateTo('profile');
-            showToast("Profile updated successfully!");
+        // MODIFIED: Functions to handle DOM deletion
+        function prepareDelete(icon) {
+            // Find the closest card container to remove it later
+            itemToDelete = icon.closest('.spa-card-item');
         }
 
-        window.onpopstate = (e) => renderPage(e.state ? e.state.id : 'dashboard');
-        window.onload = () => navigateTo(window.location.hash.substring(1) || 'dashboard');
+        function confirmDelete() {
+            if (itemToDelete) {
+                itemToDelete.remove(); // Removes the card from the HTML
+                itemToDelete = null; // Clear the reference
+            }
+            
+            // Close the modal
+            const modalEl = document.getElementById('deleteServiceModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+            
+            showToast("Service has been deleted successfully.");
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 3500);
+        }
+
+        window.onload = () => { showSection('dashboard'); };
     </script>
 </body>
 </html>
