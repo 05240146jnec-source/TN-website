@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TN ADMIN - Bookings</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-green: #005a2b;
+            --bg-light: #ffffff;
+            --card-bg: #f5f6f7;
+            --border-line: #e0e0e0;
+            --text-black: #000000;
+            --top-bar-grey: #f8f9fa;
+            --content-grey: #f0f2f5;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body, html { height: 100%; overflow: hidden; }
+
+        .wrapper { display: flex; height: 100vh; width: 100%; }
+
+        /* --- SIDEBAR (Same as Dashboard) --- */
+        .sidebar {
+            width: 320px; background: white; display: flex; flex-direction: column;
+            padding: 40px 0; border-right: 1.5px solid var(--border-line); height: 100%; 
+        }
+        .logo-area { padding: 0 40px; margin-bottom: 70px; font-size: 22px; font-weight: 800; text-decoration: none; color: var(--text-black); }
+        .logo-area span { color: var(--primary-green); }
+        .nav-links { list-style: none; padding: 0 25px; flex-grow: 1; }
+        .nav-item {
+            display: flex; align-items: center; padding: 14px 25px; margin-bottom: 15px;
+            cursor: pointer; border-radius: 50px; font-weight: 700; color: var(--text-black);
+            text-decoration: none; transition: 0.3s;
+        }
+        .nav-item i { margin-right: 20px; font-size: 25px; width: 30px; text-align: center; }
+        .nav-item:hover { background-color: #f1f3f5; }
+        .nav-item.active { background-color: var(--primary-green); color: white !important; }
+
+        /* --- MAIN CONTAINER --- */
+        .main-container { flex: 1; display: flex; flex-direction: column; height: 100%; }
+
+        /* TOP BAR */
+        .top-bar {
+            height: 100px; display: flex; justify-content: center; align-items: center;
+            padding: 0 60px; background-color: var(--top-bar-grey); 
+            border-bottom: 1.5px solid var(--border-line); position: relative;
+        }
+        .top-bar h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin: 0; }
+
+        .admin-profile-dropdown { position: absolute; right: 60px; }
+        .admin-profile {
+            display: flex; align-items: center; gap: 12px; background: white; padding: 8px 18px 8px 8px;
+            border-radius: 50px; border: 1px solid var(--border-line); cursor: pointer; text-decoration: none; color: inherit;
+        }
+        .avatar {
+            width: 32px; height: 32px; background-color: var(--primary-green); color: white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;
+        }
+        .dropdown-menu {
+            border-radius: 15px;
+            border: 1px solid var(--border-line);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 10px 0;
+            margin-top: 10px !important;
+        }
+        .dropdown-item {
+            font-weight: 600;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        .dropdown-item.logout { color: #d93025; }
+
+        /* --- CONTENT AREA (BOOKING SPECIFIC) --- */
+        .content-section { padding: 40px 60px; overflow-y: auto; flex-grow: 1; background-color: #f0f2f5; }
+        .booking-wrapper { background-color: #e5e5e5; border-radius: 30px; padding: 40px; min-height: 85vh; }
+
+        /* Search and Filter UI */
+        .search-row { background: white; border: 1px solid #999; border-radius: 15px; display: flex; align-items: center; padding: 5px 20px; margin-bottom: 30px; position: relative; }
+        .search-input-group { display: flex; align-items: center; flex: 1; gap: 15px; border-right: 1px solid #ccc; padding: 5px 0; }
+        .search-input-group input { border: none; outline: none; width: 100%; font-size: 17px; font-family: 'Playfair Display', serif; }
+        
+        .status-dropdown-container { position: relative; padding-left: 20px; min-width: 160px; }
+        .status-trigger { cursor: pointer; font-family: 'Playfair Display', serif; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
+        .status-menu { display: none; position: absolute; top: 110%; right: 0; background: white; border: 1px solid #ccc; border-radius: 10px; width: 150px; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; }
+        .status-menu div { padding: 10px 15px; cursor: pointer; transition: 0.2s; }
+        .status-menu div:hover { background: #f0f0f0; }
+
+        .booking-tabs { background: #d1d1d1; padding: 8px; border-radius: 15px; display: flex; gap: 10px; margin-bottom: 40px; }
+        .tab-btn { flex: 1; padding: 12px; text-align: center; font-family: 'Playfair Display', serif; font-weight: 700; border-radius: 12px; cursor: pointer; border: none; background: transparent; }
+        .tab-btn.active { background: white; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { font-family: 'Playfair Display', serif; font-size: 18px; text-align: left; padding: 15px 10px; border-bottom: 1px solid #bbb; }
+        td { padding: 20px 10px; vertical-align: top; border-bottom: 1px solid #ccc; }
+        .status-pill { padding: 4px 12px; border-radius: 10px; font-weight: 600; font-size: 13px; display: inline-block; }
+        .st-Cancelled { background: #ffcdd2; color: #d32f2f; }
+        .st-Confirmed { background: #c8e6c9; color: #2e7d32; }
+        .st-Pending { background: #fff3e0; color: #e65100; }
+        .actions-cell { display: flex; gap: 15px; font-size: 20px; cursor: pointer; color: black; }
+        .actions-cell i:hover { opacity: 0.7; }
+
+        /* Modal Styling */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-card { background: white; width: 650px; border-radius: 20px; padding: 35px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+        .close-modal { position: absolute; top: 20px; right: 25px; font-size: 28px; cursor: pointer; color: #333; }
+        .close-modal:hover { color: #000; }
+        .modal-header h2 { font-weight: 800; font-size: 24px; margin-bottom: 5px; font-family: 'Playfair Display', serif; }
+        .modal-header p { font-size: 14px; color: #666; margin-bottom: 25px; }
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 40px; }
+        .modal-item label { display: block; font-weight: 800; font-size: 13px; margin-bottom: 5px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .modal-item p { font-size: 16px; color: #000; font-weight: 600; margin: 0; }
+        .modal-item .val-bold { font-weight: 800; font-size: 18px; color: var(--primary-green); }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 15px; margin-top: 35px; }
+        .btn-cancel-modal { border: 1px solid #ff5252; color: #ff5252; background: white; padding: 10px 25px; border-radius: 10px; cursor: pointer; font-weight: 700; }
+        .btn-confirm-modal { background: var(--primary-green); color: white; border: none; padding: 10px 25px; border-radius: 10px; cursor: pointer; font-weight: 700; }
+
+        /* Prompt Overlay */
+        .prompt-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
+        .prompt-box { background: white; padding: 30px; border-radius: 15px; text-align: center; width: 380px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        .prompt-box p { font-size: 18px; font-weight: 700; margin-bottom: 25px; }
+        .prompt-btns { display: flex; justify-content: center; gap: 20px; }
+        .prompt-btn { padding: 10px 30px; border-radius: 8px; cursor: pointer; font-weight: 700; border: none; font-size: 14px; }
+        .btn-yes { background: var(--primary-green); color: white; }
+        .btn-no { background: #eee; color: #333; }
+
+        /* Bootstrap Modal Override */
+        .modal-content { border-radius: 20px; border: none; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <a href="dashboard.html" class="logo-area">
+            <span>TN</span> ADMIN
+        </a>
+        <ul class="nav-links">
+            <li><a href="dashboard.html" class="nav-item"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a></li>
+            <li><a href="booking.html" class="nav-item active"><i class="fa-solid fa-calendar-check"></i> Bookings</a></li>
+            <li><a href="menu.html" class="nav-item"><i class="fa-solid fa-utensils"></i> Restaurant Menu</a></li>
+            <li><a href="rooms.html" class="nav-item"><i class="fa-solid fa-bed"></i> Rooms</a></li>
+            <li><a href="spa_service.html" class="nav-item"><i class="fa-solid fa-spa"></i> Spa Services</a></li>
+            <li><a href="user.html" class="nav-item"><i class="fa-solid fa-circle-user"></i> User</a></li>
+            <li><a href="feedback.html" class="nav-item"><i class="fa-solid fa-comments"></i> Feedback</a></li>
+        </ul>
+    </aside>
+
+    <!-- MAIN CONTAINER -->
+    <div class="main-container">
+        <header class="top-bar">
+            <h1>Bookings</h1>
+            
+            <div class="admin-profile-dropdown dropdown">
+                <div class="admin-profile dropdown-toggle" id="adminDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="avatar">A</div>
+                    <strong style="font-size: 13px;">Admin</strong>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="adminDropdown">
+                    <li><a class="dropdown-item" href="profile.html">Profile Setting</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item logout" href="#" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal">Log Out</a></li>
+                </ul>
+            </div>
+        </header>
+
+        <main class="content-section">
+            <div class="booking-wrapper">
+                
+                <!-- Search and Status Filter Row -->
+                <div class="search-row">
+                    <div class="search-input-group">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchInput" placeholder="Search by ID, guest name and services" onkeyup="renderTable()">
+                    </div>
+                    <div class="status-dropdown-container">
+                        <div class="status-trigger" onclick="toggleStatusMenu()">
+                            <span id="currentStatusText">All Status</span> <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <div class="status-menu" id="statusMenu">
+                            <div onclick="selectStatusFilter('All Status')">All Status</div>
+                            <div onclick="selectStatusFilter('Confirmed')">Confirmed</div>
+                            <div onclick="selectStatusFilter('Pending')">Pending</div>
+                            <div onclick="selectStatusFilter('Cancelled')">Cancelled</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Tabs -->
+                <div class="booking-tabs">
+                    <button class="tab-btn active" onclick="filterTab(this, 'All')">All (8)</button>
+                    <button class="tab-btn" onclick="filterTab(this, 'Room')">Rooms (3)</button>
+                    <button class="tab-btn" onclick="filterTab(this, 'Restaurant')">Restaurant (4)</button>
+                    <button class="tab-btn" onclick="filterTab(this, 'Spa')">Spa (5)</button>
+                </div>
+
+                <!-- Bookings Table -->
+                <table class="custom-table">
+                    <thead>
+                        <tr><th>ID</th><th>Guest</th><th>Type</th><th>Service</th><th>Date</th><th>Status</th><th>Amount</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- LOGOUT CONFIRMATION MODAL -->
+<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center shadow">
+            <div class="modal-header border-0 justify-content-center">
+                <h5 class="modal-title h3" style="font-family: 'Playfair Display'; font-weight: 700;">Are you sure?</h5>
+            </div>
+            <div class="modal-body py-0">
+                <p class="text-muted">Do you really want to log out of the admin panel?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" data-bs-dismiss="modal">No, stay</button>
+                <a href="login.html" class="btn-confirm" style="text-decoration: none;">Yes, Log Out</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Management Modal -->
+<div class="modal-overlay" id="manageModal">
+    <div class="modal-card">
+        <span class="close-modal" onclick="closeModals()">&times;</span>
+        <div class="modal-header">
+            <h2 id="m-id">Booking Details</h2>
+            <p>View and manage booking information</p>
+        </div>
+        <div class="modal-grid">
+            <div class="modal-item"><label>Guest Name</label><p id="m-name"></p></div>
+            <div class="modal-item"><label>Status</label><p id="m-status"></p></div>
+            <div class="modal-item"><label>Email</label><p id="m-email"></p></div>
+            <div class="modal-item"><label>Phone</label><p id="m-phone"></p></div>
+            <div class="modal-item"><label>Type</label><p id="m-type"></p></div>
+            <div class="modal-item"><label>Service</label><p id="m-service"></p></div>
+            <div class="modal-item"><label>Date</label><p class="val-bold" id="m-date"></p></div>
+            <div class="modal-item"><label>Amount</label><p class="val-bold" id="m-amount"></p></div>
+            <div class="modal-item"><label>Check-in</label><p class="val-bold" id="m-checkin"></p></div>
+            <div class="modal-item"><label>Check-out</label><p class="val-bold" id="m-checkout"></p></div>
+        </div>
+        <div class="modal-footer" id="modalButtons">
+            <button class="btn-cancel-modal" onclick="triggerPrompt('Cancelled', 'Are you sure you want to cancel this booking?')">Cancel Booking</button>
+            <button class="btn-confirm-modal" onclick="triggerPrompt('Confirmed', 'Are you sure you want to confirm this booking?')">Confirm Booking</button>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Prompt Overlay -->
+<div class="prompt-overlay" id="promptOverlay">
+    <div class="prompt-box">
+        <p id="promptMessage">Are you sure?</p>
+        <div class="prompt-btns">
+            <button class="prompt-btn btn-no" onclick="closePrompt()">No</button>
+            <button class="prompt-btn btn-yes" onclick="executeStatusChange()">Yes</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Enhanced booking data with more entries
+    let bookings = [
+        { id: "BK-001", name: "Dorji Wangchuk", email: "dorji@email.com", phone: "+975 77848491", type: "Room", service: "Deluxe Room", date: "2026-03-04", status: "Pending", amount: "Nu. 8,000", checkin: "2026-03-04", checkout: "2026-03-06" },
+        { id: "BK-002", name: "Rajesh Sharma", email: "rajesh@email.com", phone: "+975 17654321", type: "Restaurant", service: "Table for 4", date: "2026-03-04", status: "Cancelled", amount: "Nu. 2,500", checkin: "2026-03-04", checkout: "N/A" },
+        { id: "BK-003", name: "Suman Gurung", email: "suman@email.com", phone: "+975 77848411", type: "Spa", service: "Full Body Massage", date: "2026-03-05", status: "Confirmed", amount: "Nu. 3,200", checkin: "2026-03-05", checkout: "N/A" },
+        { id: "BK-004", name: "Pema Lhamo", email: "pema@email.com", phone: "+975 77123456", type: "Room", service: "Ocean View Suite", date: "2026-03-06", status: "Confirmed", amount: "Nu. 12,000", checkin: "2026-03-06", checkout: "2026-03-10" },
+        { id: "BK-005", name: "Tashi Phuntsho", email: "tashi@email.com", phone: "+975 77987654", type: "Spa", service: "Aromatherapy", date: "2026-03-07", status: "Pending", amount: "Nu. 4,500", checkin: "2026-03-07", checkout: "N/A" },
+        { id: "BK-006", name: "Yangchen Dolma", email: "yangchen@email.com", phone: "+975 77345678", type: "Restaurant", service: "Private Dining", date: "2026-03-08", status: "Confirmed", amount: "Nu. 5,800", checkin: "2026-03-08", checkout: "N/A" },
+        { id: "BK-007", name: "Karma Tshering", email: "karma@email.com", phone: "+975 77223344", type: "Room", service: "Executive Room", date: "2026-03-09", status: "Pending", amount: "Nu. 9,500", checkin: "2026-03-09", checkout: "2026-03-12" },
+        { id: "BK-008", name: "Sonam Choden", email: "sonam@email.com", phone: "+975 77889900", type: "Spa", service: "Hot Stone Massage", date: "2026-03-10", status: "Cancelled", amount: "Nu. 3,800", checkin: "2026-03-10", checkout: "N/A" }
+    ];
+
+    let targetId = null;
+    let nextStatus = null;
+    let currentType = 'All';
+    let currentStatusFilter = 'All Status';
+
+    function renderTable() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const body = document.getElementById('tableBody');
+        body.innerHTML = "";
+
+        let filtered = bookings.filter(b => {
+            const matchesSearch = b.name.toLowerCase().includes(search) || 
+                                 b.id.toLowerCase().includes(search) || 
+                                 b.service.toLowerCase().includes(search);
+            const matchesTab = currentType === 'All' || b.type === currentType;
+            const matchesStatus = currentStatusFilter === 'All Status' || b.status === currentStatusFilter;
+            return matchesSearch && matchesTab && matchesStatus;
+        });
+
+        if (filtered.length === 0) {
+            body.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 60px;"><i class="fa-regular fa-calendar-xmark fa-2x mb-3" style="color: #999;"></i><p style="color: #666;">No bookings found</p></td></tr>';
+            return;
+        }
+
+        filtered.forEach(b => {
+            body.innerHTML += `
+                <tr>
+                    <td><strong>${b.id}</strong></td>
+                    <td><strong>${b.name}</strong><br><small style="color: #666;">${b.email}</small></td>
+                    <td>${b.type}</td>
+                    <td>${b.service}</td>
+                    <td>${b.date}</td>
+                    <td><span class="status-pill st-${b.status}">${b.status}</span></td>
+                    <td>${b.amount}</td>
+                    <td class="actions-cell">
+                        <i class="fa-solid fa-eye" onclick="openModal('${b.id}', true)" title="View Details"></i>
+                        ${b.status === 'Pending' ? `
+                            <i class="fa-solid fa-circle-check" style="color: #005a2b;" onclick="openModal('${b.id}', false)" title="Manage Booking"></i>
+                            <i class="fa-solid fa-square-xmark" style="color: #d32f2f;" onclick="directPrompt('${b.id}', 'Cancelled', 'Are you sure you want to cancel this booking?')" title="Cancel"></i>
+                        ` : ''}
+                    </td>
+                </tr>
+            `;
+        });
+
+        // Update tab counts
+        updateTabCounts();
+    }
+
+    function updateTabCounts() {
+        const allCount = bookings.length;
+        const roomsCount = bookings.filter(b => b.type === 'Room').length;
+        const restaurantCount = bookings.filter(b => b.type === 'Restaurant').length;
+        const spaCount = bookings.filter(b => b.type === 'Spa').length;
+        
+        const tabs = document.querySelectorAll('.tab-btn');
+        if (tabs[0]) tabs[0].innerHTML = `All (${allCount})`;
+        if (tabs[1]) tabs[1].innerHTML = `Rooms (${roomsCount})`;
+        if (tabs[2]) tabs[2].innerHTML = `Restaurant (${restaurantCount})`;
+        if (tabs[3]) tabs[3].innerHTML = `Spa (${spaCount})`;
+    }
+
+    // Dropdown Handlers
+    function toggleStatusMenu() {
+        const menu = document.getElementById('statusMenu');
+        menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function selectStatusFilter(status) {
+        currentStatusFilter = status;
+        document.getElementById('currentStatusText').innerText = status;
+        document.getElementById('statusMenu').style.display = 'none';
+        renderTable();
+    }
+
+    function filterTab(btn, type) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentType = type;
+        renderTable();
+    }
+
+    // Modal functions
+    function openModal(id, viewOnly) {
+        targetId = id;
+        const b = bookings.find(x => x.id === id);
+        if (!b) return;
+        
+        document.getElementById('m-id').innerHTML = "Booking " + b.id;
+        document.getElementById('m-name').innerText = b.name;
+        document.getElementById('m-status').innerHTML = `<span class="status-pill st-${b.status}">${b.status}</span>`;
+        document.getElementById('m-email').innerText = b.email;
+        document.getElementById('m-phone').innerText = b.phone;
+        document.getElementById('m-type').innerText = b.type;
+        document.getElementById('m-service').innerText = b.service;
+        document.getElementById('m-date').innerText = b.date;
+        document.getElementById('m-amount').innerText = b.amount;
+        document.getElementById('m-checkin').innerText = b.checkin;
+        document.getElementById('m-checkout').innerText = b.checkout;
+        
+        const modalButtons = document.getElementById('modalButtons');
+        if (viewOnly || b.status !== 'Pending') {
+            modalButtons.style.display = 'none';
+        } else {
+            modalButtons.style.display = 'flex';
+        }
+        
+        document.getElementById('manageModal').style.display = 'flex';
+    }
+
+    function closeModals() { 
+        document.getElementById('manageModal').style.display = 'none'; 
+    }
+
+    function triggerPrompt(status, msg) {
+        nextStatus = status;
+        document.getElementById('promptMessage').innerText = msg;
+        document.getElementById('promptOverlay').style.display = 'flex';
+    }
+
+    function directPrompt(id, status, msg) {
+        targetId = id;
+        triggerPrompt(status, msg);
+    }
+
+    function closePrompt() { 
+        document.getElementById('promptOverlay').style.display = 'none'; 
+    }
+
+    function executeStatusChange() {
+        const b = bookings.find(x => x.id === targetId);
+        if (b) {
+            b.status = nextStatus;
+            renderTable();
+            // If modal is open, close it
+            closeModals();
+        }
+        closePrompt();
+    }
+
+    // Close dropdown when clicking outside
+    window.onclick = function(event) {
+        const statusMenu = document.getElementById('statusMenu');
+        if (!event.target.closest('.status-dropdown-container') && statusMenu) {
+            statusMenu.style.display = 'none';
+        }
+        if (event.target === document.getElementById('manageModal')) {
+            closeModals();
+        }
+        if (event.target === document.getElementById('promptOverlay')) {
+            closePrompt();
+        }
+    }
+
+    // Initialize on load
+    window.onload = () => {
+        renderTable();
+    };
+</script>
+
+<style>
+    .btn-cancel {
+        background: #eee;
+        color: #333;
+        border-radius: 10px;
+        padding: 10px 25px;
+        font-weight: 600;
+        border: none;
+    }
+    .btn-confirm {
+        background: var(--primary-green);
+        color: white;
+        border-radius: 10px;
+        padding: 10px 25px;
+        font-weight: 600;
+        border: none;
+        text-decoration: none;
+    }
+    .custom-table {
+        width: 100%;
+        background: transparent;
+    }
+    .custom-table th {
+        padding: 15px 10px;
+        font-weight: 800;
+        border-bottom: 2px solid #bbb;
+        font-size: 16px;
+        color: #333;
+    }
+    .custom-table td {
+        padding: 20px 10px;
+        border-bottom: 1px solid #ccc;
+    }
+</style>
+
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TN ADMIN - Rooms Management</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-green: #005a2b;
+            --bg-light: #ffffff;
+            --container-bg: #e9e9e9;
+            --border-line: #e0e0e0;
+            --text-black: #000000;
+            --input-bg: #f2f2f2;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body, html { height: 100%; overflow: hidden; }
+        .wrapper { display: flex; height: 100vh; width: 100%; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 320px; background: white; display: flex; flex-direction: column; padding: 40px 0; border-right: 1.5px solid var(--border-line); height: 100%; }
+        .logo-area { padding: 0 40px; margin-bottom: 70px; font-size: 22px; font-weight: 800; text-decoration: none; color: var(--text-black); }
+        .logo-area span { color: var(--primary-green); }
+        .nav-links { list-style: none; padding: 0 25px; flex-grow: 1; }
+        .nav-item { display: flex; align-items: center; padding: 14px 25px; margin-bottom: 15px; cursor: pointer; border-radius: 50px; font-weight: 700; color: var(--text-black); text-decoration: none; transition: 0.3s; }
+        .nav-item i { margin-right: 20px; font-size: 25px; width: 30px; text-align: center; }
+        .nav-item:hover { background-color: #f1f3f5; }
+        .nav-item.active { background-color: var(--primary-green); color: white !important; }
+
+        /* --- MAIN CONTENT --- */
+        .main-container { flex: 1; display: flex; flex-direction: column; height: 100%; }
+        .top-bar { height: 100px; display: flex; justify-content: center; align-items: center; padding: 0 60px; background-color: #fff; border-bottom: 1.5px solid var(--border-line); position: relative; }
+        .top-bar h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin: 0; }
+        .admin-profile { position: absolute; right: 60px; display: flex; align-items: center; gap: 12px; background: white; padding: 8px 18px 8px 8px; border-radius: 50px; border: 1px solid var(--border-line); }
+        .avatar { width: 32px; height: 32px; background-color: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        .content-area { background-color: var(--container-bg); margin: 30px; border-radius: 20px; padding: 40px; flex-grow: 1; overflow-y: auto; }
+        .btn-add-room { background-color: var(--primary-green); color: white; border: none; padding: 12px 30px; border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 10px; float: right; margin-bottom: 30px; }
+
+        /* ROOM CARDS */
+        .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 30px; clear: both; }
+        .room-card { background: white; border-radius: 25px; padding: 30px; position: relative; }
+        .room-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+        .action-icons { position: absolute; top: 30px; right: 30px; display: flex; gap: 15px; font-size: 18px; color: #555; }
+        .action-icons i { cursor: pointer; transition: 0.2s; }
+        .action-icons i:hover { color: var(--primary-green); }
+        .room-desc { font-size: 14px; color: #666; margin-bottom: 20px; max-width: 85%; }
+        .price-tag { text-align: right; font-weight: 600; margin-bottom: 15px; }
+        .amenity-badge { background: #eee; padding: 5px 12px; border-radius: 8px; font-size: 12px; margin-right: 5px; display: inline-block; margin-bottom: 5px; }
+        
+        .card-footer { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 20px; }
+        .status-label { font-size: 14px; font-weight: 600; text-transform: capitalize; color: #333; }
+
+        /* --- SHARED MODAL STYLING --- */
+        .modal-content { border-radius: 20px; border: none; padding: 25px; position: relative; }
+        .btn-close-custom { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 24px; color: black; cursor: pointer; }
+        .modal-title-custom { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 22px; margin-bottom: 2px; }
+        .modal-subtitle { font-family: 'Playfair Display', serif; font-size: 15px; color: #444; margin-bottom: 25px; }
+        .form-label { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 17px; margin-bottom: 8px; display: block; }
+        .custom-input { background-color: transparent; border: 1px solid #999; border-radius: 10px; padding: 10px 15px; width: 100%; outline: none; }
+        
+        .modal-footer-custom { display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px; }
+        .btn-cancel-outline { background: white; border: 1px solid #777; border-radius: 12px; padding: 10px 35px; font-weight: 500; min-width: 120px; }
+        .btn-green-fill { background: var(--primary-green); color: white; border: none; border-radius: 12px; padding: 10px 35px; font-weight: 500; min-width: 140px; }
+
+        /* --- ADD ROOM SPECIFIC --- */
+        .upload-box { background-color: var(--input-bg); border: 1px dashed #ccc; height: 80px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; }
+        #imagePreview { width: 100%; height: 100%; object-fit: cover; display: none; }
+
+        /* --- DELETE MODAL --- */
+        .delete-text { font-family: 'Playfair Display', serif; font-size: 16px; margin: 30px 0; }
+
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <a href="dashboard.html" class="logo-area"><span>TN</span> ADMIN</a>
+            <ul class="nav-links">
+                <li><a href="dashboard.html" class="nav-item"><i class="fa-solid fa-table-cells-large"></i> Dashboard</a></li>
+                <li><a href="booking.html" class="nav-item"><i class="fa-solid fa-calendar-check"></i> Bookings</a></li>
+                <li><a href="menu.html" class="nav-item"><i class="fa-solid fa-utensils"></i> Restaurant Menu</a></li>
+                <li><a href="rooms.html" class="nav-item active"><i class="fa-solid fa-bed"></i> Rooms</a></li>
+                <li><a href="spa_service.html" class="nav-item"><i class="fa-solid fa-spa"></i> Spa Services</a></li>
+                <li><a href="user.html" class="nav-item"><i class="fa-solid fa-circle-user"></i> User</a></li>
+                <li><a href="feedback.html" class="nav-item"><i class="fa-solid fa-comments"></i> Feedback</a></li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTAINER -->
+        <div class="main-container">
+            <header class="top-bar">
+                <h1>Rooms</h1>
+                <div class="admin-profile">
+                    <div class="avatar">A</div>
+                    <strong style="font-size: 13px;">Admin</strong>
+                </div>
+            </header>
+
+            <main class="content-area">
+                <button class="btn-add-room" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+                    <i class="fa-solid fa-plus"></i> Add Room
+                </button>
+
+                <div class="room-grid">
+                    <!-- Standard Room Card -->
+                    <div class="room-card">
+                        <div class="room-title">Standard Room</div>
+                        <div class="action-icons">
+                            <i class="fa-regular fa-pen-to-square" onclick="openEditModal('Standard Room', 'Standard room', 'Comfortable room with essential amenities for a pleasant stay.', '1500', 'Wifi, AC, TV, Hot water')"></i>
+                            <i class="fa-regular fa-trash-can" data-bs-toggle="modal" data-bs-target="#deleteRoomModal"></i>
+                        </div>
+                        <p class="room-desc">Comfortable room with essential amenities for a pleasant stay.</p>
+                        <div class="price-tag">Nu. 1500/Per night</div>
+                        <div>
+                            <span class="amenity-badge">Wifi</span><span class="amenity-badge">AC</span>
+                            <span class="amenity-badge">TV</span><span class="amenity-badge">Hot water</span>
+                        </div>
+                        <div class="card-footer">
+                            <!-- Label ID added for dynamic change -->
+                            <span class="status-label">available</span>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" checked onchange="toggleRoomStatus(this)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Deluxe Room Card -->
+                    <div class="room-card">
+                        <div class="room-title">Deluxe Room</div>
+                        <div class="action-icons">
+                            <i class="fa-regular fa-pen-to-square" onclick="openEditModal('Deluxe Room', 'Deluxe Room', 'Spacious room with premium furnishing and garden views', '3000', 'Wifi, TV, AC, Hot Water')"></i>
+                            <i class="fa-regular fa-trash-can" data-bs-toggle="modal" data-bs-target="#deleteRoomModal"></i>
+                        </div>
+                        <p class="room-desc">Spacious room with premium furnishing and garden views.</p>
+                        <div class="price-tag">Nu. 5000/Per night</div>
+                        <div>
+                            <span class="amenity-badge">AC</span><span class="amenity-badge">Wifi</span>
+                            <span class="amenity-badge">TV</span><span class="amenity-badge">Hot water</span>
+                        </div>
+                        <div class="card-footer">
+                            <span class="status-label">available</span>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" checked onchange="toggleRoomStatus(this)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL 1: ADD ROOM -->
+    <div class="modal fade" id="addRoomModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <button type="button" class="btn-close-custom" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i></button>
+                <h2 class="modal-title-custom">Add Room</h2>
+                <p class="modal-subtitle">Add the menu item details below</p>
+                <form>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Room name</label>
+                            <input type="text" class="custom-input" style="background:#f2f2f2; border:none;" placeholder="Deluxe 2">
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <label class="form-label">Upload Image</label>
+                            <label for="roomImg" class="upload-box" id="uploadLabel">
+                                <i class="fa-solid fa-arrow-up-from-bracket" id="uploadIcon"></i>
+                                <img id="imagePreview" src="" alt="Preview">
+                            </label>
+                            <input type="file" id="roomImg" hidden accept="image/*">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Price(Nu)</label>
+                            <input type="number" class="custom-input" style="background:#f2f2f2; border:none;" placeholder="3500">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Category</label>
+                            <select class="custom-input" style="background:#f2f2f2; border:none;">
+                                <option>Standard room</option>
+                                <option>Deluxe room</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer-custom" style="justify-content: center;">
+                        <button type="button" class="btn-modal-cancel btn-cancel-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn-modal-add btn-green-fill" onclick="confirmAlert('Room Added Successfully')">Add room</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: EDIT ROOM -->
+    <div class="modal fade" id="editRoomModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <button type="button" class="btn-close-custom" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i></button>
+                <h2 class="modal-title-custom">Edit Room</h2>
+                <p class="modal-subtitle">Update room details below</p>
+                <form>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Room Name</label>
+                            <input type="text" id="editName" class="custom-input">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Type</label>
+                            <select id="editType" class="custom-input">
+                                <option>Deluxe Room</option>
+                                <option>Standard room</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Description</label>
+                        <textarea id="editDesc" class="custom-input" rows="2"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Price / Night</label>
+                        <input type="number" id="editPrice" class="custom-input" style="width: 120px; border-radius: 50px;">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Amenities</label>
+                        <input type="text" id="editAmenities" class="custom-input">
+                    </div>
+                    <div class="modal-footer-custom">
+                        <button type="button" class="btn-cancel-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn-green-fill" onclick="confirmAlert('Changes Saved Successfully')">Save Change</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: DELETE ROOM -->
+    <div class="modal fade" id="deleteRoomModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <button type="button" class="btn-close-custom" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i></button>
+                <h2 class="modal-title-custom">Delete Room</h2>
+                <p class="delete-text">Are you sure ? This action cannot be undone.</p>
+                <div class="modal-footer-custom">
+                    <button type="button" class="btn-cancel-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn-green-fill" onclick="confirmAlert('Room Deleted Successfully')">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // --- DYNAMIC STATUS TOGGLE LOGIC ---
+        function toggleRoomStatus(checkbox) {
+            const footer = checkbox.closest('.card-footer');
+            const label = footer.querySelector('.status-label');
+            
+            if (checkbox.checked) {
+                label.innerText = "available";
+            } else {
+                label.innerText = "unavailable";
+            }
+        }
+
+        // Handle Image Upload Preview
+        document.getElementById('roomImg').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    document.getElementById('uploadIcon').style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Function to populate and open Edit Modal
+        function openEditModal(name, type, desc, price, amenities) {
+            document.getElementById('editName').value = name;
+            document.getElementById('editType').value = type;
+            document.getElementById('editDesc').value = desc;
+            document.getElementById('editPrice').value = price;
+            document.getElementById('editAmenities').value = amenities;
+            new bootstrap.Modal(document.getElementById('editRoomModal')).show();
+        }
+
+        // Generic success alert
+        function confirmAlert(msg) {
+            alert(msg);
+            bootstrap.Modal.getInstance(document.querySelector('.modal.show')).hide();
+        }
+    </script>
+</body>
+</html>
